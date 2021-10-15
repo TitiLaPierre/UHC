@@ -1,0 +1,180 @@
+Options:
+	sound-error: entity.villager.no
+	sound-success: block.note.pling
+	sound-click: ui.button.click
+
+Function uhcHostTabGeneral(p: player):
+	set {_game} to {host-player::%{_p}%}
+
+	#
+	#     >  Rename
+	#
+	
+	set {_rename} to name tag named string("uhc.gui.general.rename.name", {_p})
+	set lore of {_rename} to colored strings("uhc.gui.general.rename.lore", {_p})
+
+	#
+	#     >  Slots
+	#
+
+	set {_players} to {host::%{_game}%::slots} of player head named string("uhc.gui.general.slots.name", {_p})
+	set lore of {_players} to colored strings("uhc.gui.general.slots.lore", {_p}, "slots;%{host::%{_game}%::slots}%")
+
+	#
+	#     >  Whitelist
+	#
+
+	if {host::%{_game}%::whitelist} is "open":
+		set {_whitelist} to lime dye named string("uhc.gui.general.whitelist.name", {_p})
+		set {_choice} to join strings("uhc.gui.general.whitelist.public", {_p}) by nl
+		set {_description} to join strings("uhc.gui.general.whitelist.public_lore", {_p}) by nl
+	else:
+		set {_whitelist} to gray dye named string("uhc.gui.general.whitelist.name", {_p})
+		set {_choice} to join strings("uhc.gui.general.whitelist.private", {_p}) by nl
+		set {_description} to join strings("uhc.gui.general.whitelist.private_lore", {_p}) by nl
+	set lore of {_whitelist} to colored strings("uhc.gui.general.whitelist.lore", {_p}, ("choice;%{_choice}%", "description;%{_description}%"))
+
+	#
+	#     >  Annoncement
+	#
+
+	set {_annoncement} to note block named string("uhc.gui.general.annonce.name", {_p})
+	set lore of {_annoncement} to colored strings("uhc.gui.disabled", {_p})
+
+	#
+	#     >  Teams
+	#
+
+	set {_teams} to {host::%{_game}%::team} of white banner item named string("uhc.gui.general.teams.name", {_p})
+
+
+	if {host::%{_game}%::team} is 1:
+		set {_choice} to join strings("uhc.gui.general.teams.solo", {_p}) by nl
+	else if {host::%{_game}%::team} is 2:
+		set {_choice} to join strings("uhc.gui.general.teams.duo", {_p}) by nl
+	else if {host::%{_game}%::team} is 3:
+		set {_choice} to join strings("uhc.gui.general.teams.trio", {_p}) by nl
+	else if {host::%{_game}%::team} is 4:
+		set {_choice} to join strings("uhc.gui.general.teams.quatuor", {_p}) by nl
+	else if {host::%{_game}%::team} is 5:
+		set {_choice} to join strings("uhc.gui.general.teams.team", {_p}) by nl
+
+	set lore of {_teams} to colored strings("uhc.gui.general.teams.lore", {_p}, "choice;%{_choice}%")
+
+	#
+	#     >  GUI
+	#
+
+	set slot 20 of open inventory of {_p} to {_rename}
+	set slot 22 of open inventory of {_p} to {_players}
+	set slot 24 of open inventory of {_p} to {_whitelist}
+
+	set slot 30 of open inventory of {_p} to {_annoncement}
+	set slot 32 of open inventory of {_p} to {_teams}
+
+	set {cooldown::%{_p}%} to true
+	wait 0.1 second
+	clear {cooldown::%{_p}%}
+
+On inventory click:
+	event-inventory is not player's inventory
+	set {_game} to {host-player::%player%}
+	{inv::%player%} is "setup_general_%{_game}%"
+	event-clicktype is not left mouse button with shift or right mouse button with shift
+	{cooldown::%player%} is not set
+	set {cooldown::%player%} to true
+	if event-slot is 20:
+		set {_text} to {host::%{_game}%::name}
+		open an anvil gui named "uhcHost_gameName" to player with default text uncolored {_text}
+	if event-slot is 22:
+		if event-clicktype is left mouse button:
+			if {host::%{_game}%::slots} - 1 < 5:
+				play sound "{@sound-error}" with volume 0.8 and pitch 1 at player for player
+			else if size of {host::%{_game}%::p::*} > {host::%{_game}%::slots} - 1:
+				play sound "{@sound-error}" with volume 0.8 and pitch 1 at player for player
+			else:
+				remove 1 from {host::%{_game}%::slots}
+				uhcHostUpdate(player)
+				set {_editedTeams::*} to uhcTeamCheck({_game})
+				loop {host::%{_game}%::p::*}:
+					uhcScoreWaitingUpdate(loop-value)
+				play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+		else if event-clicktype is right mouse button:
+			if {host::%{_game}%::slots} + 1 > 30:
+				play sound "{@sound-error}" with volume 0.8 and pitch 1 at player for player
+			else:
+				add 1 to {host::%{_game}%::slots}
+				uhcHostUpdate(player)
+				set {_editedTeams::*} to uhcTeamCheck({_game})
+				loop {host::%{_game}%::p::*}:
+					uhcScoreWaitingUpdate(loop-value)
+				play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+		loop {_editedTeams::*}:
+			loop {host::%{_game}%::game::team::%loop-value%::*}:
+				uhcTeamLeave(loop-value-2)
+				send "" to loop-value-2
+				send string("uhc.warnings.kicked_from_team", loop-value-2) to loop-value-2
+				send string("uhc.warnings.kick_reason_slots", loop-value-2) to loop-value-2
+				send "" to loop-value-2
+		loop {host::%{_game}%::p::*}:
+			uhcTeamsUpdate(loop-value, {inv::%loop-value%::page::index})
+	if event-slot is 24:
+		if {host::%{_game}%::whitelist} is "private":
+			set {host::%{_game}%::whitelist} to "open"
+		else:
+			set {host::%{_game}%::whitelist} to "private"
+		uhcHostUpdate(player)
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	#if event-slot is 30:
+	#	uhcManageAnnonce(player)
+	#	play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	#	close player's inventory
+	if event-slot is 32:
+		if event-clicktype is left mouse button:
+			set {_value} to {host::%{_game}%::team} + 1
+			set {_value} to 1 if ({_value} > 5)
+			set {host::%{_game}%::team} to {_value}
+			uhcHostUpdate(player)
+			set {_editedTeams::*} to uhcTeamCheck({_game})
+			play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+		else if event-clicktype is right mouse button:
+			set {_value} to {host::%{_game}%::team} - 1
+			set {_value} to 5 if ({_value} < 1)
+			set {host::%{_game}%::team} to {_value}
+			uhcHostUpdate(player)
+			set {_editedTeams::*} to uhcTeamCheck({_game})
+			play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+		loop {_editedTeams::*}:
+			loop {host::%{_game}%::game::team::%loop-value%::*}:
+				uhcTeamLeave(loop-value-2)
+				send "" to loop-value-2
+				send string("uhc.warnings.kicked_from_team", loop-value-2) to loop-value-2
+				send string("uhc.warnings.kick_reason_teams", loop-value-2) to loop-value-2
+				send "" to loop-value-2
+		loop {host::%{_game}%::teams::*}:
+			size of {host::%{_game}%::game::team::%loop-value%::*} > {host::%{_game}%::team}
+			set {_p} to last element of {host::%{_game}%::game::team::%loop-value%::*}
+			uhcTeamLeave({_p})
+			send "" to {_p}
+			send string("uhc.warnings.kicked_from_team", {_p}) to {_p}
+			send string("uhc.warnings.kick_reason_teams", {_p}) to {_p}
+			send "" to {_p}
+		loop {host::%{_game}%::p::*}:
+			uhcTeamsUpdate(loop-value, {inv::%loop-value%::page::index})
+	wait 0.1 second
+	clear {cooldown::%player%}
+
+On close anvil gui named "uhcHost_gameName":
+	set {_game} to {host-player::%player%}
+	if size of event-string split at "" < 3:
+		play sound "{@sound-error}" at player for player
+		send string("uhc.error.name_too_short", player)
+	else if size of event-string split at "" > 25:
+		play sound "{@sound-error}" at player for player
+		send string("uhc.error.name_too_long", player)
+	else:
+		set {host::%{_game}%::name} to join "&6&l" and uncolored event-string
+	uhcScoreWaitingUpdate({host::%{_game}%::p::*})
+	uhcTab()
+	wait a tick
+	uhcHostOpen(player, "general")

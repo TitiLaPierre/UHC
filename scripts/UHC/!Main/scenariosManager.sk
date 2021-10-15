@@ -1,0 +1,28 @@
+custom event "uhc.scenarioconfig":
+	pattern: uhc scenario config
+	event-values: string, player
+	check:
+		continue
+
+custom event "uhc.scenarioenable":
+	pattern: uhc scenario enable
+	event-values: string, player
+	check:
+		continue
+
+custom event "uhc.scenariodisable":
+	pattern: uhc scenario disable
+	event-values: string, player
+	check:
+		continue
+
+Function uhcScenariosRegister(id: string, item: itemtype, config: boolean):
+	if {scenarios::list::*} contain {_id}:
+		uhcError("Scenarios already registered", "Try to register an already existing scenario", "scenariosManager.sk", "uhcScenariosRegister", join "ID: " and {_id})
+		stop
+	add {_id} to {scenarios::list::*}
+	set {scenarios::s::%{_id}%::item} to {_item}
+	set {scenarios::s::%{_id}%::config} to {_config}
+
+On script unload:
+	clear {scenarios::*}

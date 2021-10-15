@@ -1,0 +1,95 @@
+On damage of player:
+	"%event-world%" contain "UHCHOST-"
+	set {_game} to "%event-world%"
+	{host::%{_game}%::state} is not "ingame":
+		cancel event
+	{host::%{_game}%::nodamage} is true:
+		cancel event
+	attacker is a player:
+		{host::%{_game}%::timer} < {host::%{_game}%::game::pvp}:
+			cancel event
+		{host-player::%attacker%::team} is {host-player::%victim%::team}:
+			cancel event
+
+On death of player:
+	set {_game} to {host-player::%victim%}
+	{host::%{_game}%::state} is "ingame"
+	set death message to ""
+	heal victim
+	set {_prefix} to string("uhc.prefix", victim)
+	send title "" with subtitle string("uhc.game_management.dead", victim) to victim for 7.5 seconds with fadein 0 second and fadeout 5 ticks
+	set {_a} to attacker if (attacker is a player)
+	send colored strings("uhc.game_management.spectate", victim) to victim
+	if {host::%{_game}%::game::spec} is "none":
+		uhcPartyToLobby(victim)
+	uhcPartyDeath(victim, {_a})
+
+On portal creation:
+	broadcast "Hello there!"
+	"%event-world%" contain "UHCHOST-"
+	set {_game} to "%event-world%"
+	cancel event
+
+On portal:
+	"%event-world%" contain "UHCHOST-"
+	set {_game} to "%event-world%"
+	cancel event
+
+import:
+	org.bukkit.event.player.PlayerItemHeldEvent
+
+On chat:
+	"%event-world%" contain "UHCHOST-"
+	cancel event
+	set {_game} to "%event-world%"
+	set {_team} to {host-player::%player%::team}
+	if {host::%{_game}%::spec::*} contain player:
+		set {_teamName} to "&7%player%"
+		loop {host::%{_game}%::spec::*}:
+			send string("uhc.game_management.chat_format_spec", loop-value, ("player;%{_teamName}%", "message;%message%")) to loop-value
+	else:
+		if {_team} is set:
+			set {_teamName} to uhcGetFormattedPlayer(player)
+		else:
+			set {_teamName} to "&7%player%"
+		loop {host::%{_game}%::p::*} and {host::%{_game}%::spec::*}:
+			send string("uhc.game_management.chat_format", loop-value, ("player;%{_teamName}%", "message;%message%")) to loop-value
+
+On inventory click:
+	wait a tick # A changer
+	uhcPartyGamemode(player, (player's tool))
+
+On drop:
+	uhcPartyGamemode(player, (player's tool))
+
+On pickup:
+	type of player's tool is air or brewing stand
+	loop integers between 0 and current hotbar slot of player:
+		if slot loop-number of player is brewing stand:
+			set {_targetSlot} to loop-number
+			stop loop
+		else if slot loop-number of player is air:
+			{_targetSlot} is not set
+			set {_targetSlot} to loop-number
+	if slot {_targetSlot} of player is air:
+		player's inventory contain brewing stand
+	{_targetSlot} is current hotbar slot of player
+	uhcPartyGamemode(player, (event-item))
+
+On PlayerItemHeldEvent:
+	uhcPartyGamemode(event.getPlayer(), slot event.getNewSlot() of event.getPlayer())
+
+On click:
+	uhcPartyGamemode(player, (player's tool))
+
+Function uhcPartyGamemode(p: player, item: item):
+	set {_game} to {host-player::%{_p}%}
+	{_game} is set
+	{host::%{_game}%::state} is "ingame"
+	{host::%{_game}%::timer} is set
+	{host::%{_game}%::p::*} contain {_p}
+	{_p}'s gamemode is survival or adventure
+	if type of {_item} is brewing stand:
+		set {_p}'s gamemode to adventure
+	else:
+		set {_p}'s gamemode to survival

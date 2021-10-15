@@ -1,0 +1,114 @@
+Options:
+	sound-error: entity.villager.no
+	sound-success: block.note.pling
+	sound-click: ui.button.click
+
+Function uhcTeamsOpen(p: player):
+	set {_game} to {host-player::%{_p}%}
+	clear {inv::%{_p}%::*}
+	if {inv::%{_p}%} is set:
+		set {inv::%{_p}%::bypass} to true
+	set {inv::%{_p}%} to "teams_%{_game}%"
+	open chest inventory named string("uhc.gui.team_choice.name", {_p}) with 6 rows to {_p}
+	set slot 0 and 1 and 2 and 3 and 4 and 5 and 6 and 7 and 8 and 9 and 17 and 18 and 26 and 27 and 35 and 36 and 44 and 45 and 46 and 47 and 48 and 50 and 51 and 52 and 53 of open inventory of {_p} to blue stained glass pane named "&r"
+	uhcTeamsUpdate({_p})
+
+Function uhcTeamsUpdate(p: player, page: number=0):
+	set {_game} to {host-player::%{_p}%}
+	{inv::%{_p}%} is "teams_%{_game}%"
+	clear {inv::%{_p}%::*}
+	add all integers between 10 and 16 to {_slots::*}
+	add all integers between 19 and 25 to {_slots::*}
+	add all integers between 28 and 34 to {_slots::*}
+	add all integers between 37 and 43 to {_slots::*}
+	#
+	delete slots {_slots::*} of open inventory of {_p}
+	set slot 45 and 53 of open inventory of {_p} to blue stained glass pane named "&r"
+	#
+	set {_index} to 1
+	set {_index} to 28*{_page}
+	set {_calcBack} to {_index}-1
+	if element {_index} of {host::%{_game}%::teams::*} is set:
+		{_index} > 0
+		set {inv::%{_p}%::page::back} to true
+		set slot 45 of open inventory of {_p} to an arrow named string("uhc.gui.back.page_previous", {_p})
+	loop 28 times:
+		add 1 to {_index}
+		add element {_index} of {host::%{_game}%::teams::*} to {_return::*}
+	set {_calcNext} to {_index}+1
+	set {inv::%{_p}%::page::index} to {_page}
+	if element {_calcNext} of {host::%{_game}%::teams::*} is set:
+		set {inv::%{_p}%::page::next} to true
+		set slot 53 of open inventory of {_p} to an arrow named string("uhc.gui.back.page_next", {_p})
+	set {_index} to 0
+	while size of {_return::*} < 28:
+		add "empty" to {_return::*}
+		add 1 to {_empty}
+	if {_empty} is 28:
+		uhcTeamsUpdate({_p}, {_page} - 1)
+	loop {_return::*}:
+		add 1 to {_index}
+		if loop-value is not "empty":
+			set {_teamName} to uhcGetFormattedTeam(loop-value, {_p})
+			set {_item} to {teams::t::%loop-value%::item}
+			set name of {_item} to string("uhc.gui.team_choice.teamFormat.name", {_p}, "team;%{_teamName}%")
+			loop {host::%{_game}%::team} times:
+				set {_} to element loop-number of {host::%{_game}%::game::team::%loop-value-1%::*}
+				if {_} is set:
+					add "&8- &3%{_}%" to {_players::*}
+				else:
+					add "&8- &b..." to {_players::*}
+				clear {_}
+			set {_players} to join {_players::*} by nl
+			clear {_players::*}
+			if {host::%{_game}%::game::team::%loop-value%::*} contain {_p}:
+				set {_joinState} to "quit"
+			else:
+				set {_joinState} to "join"
+			set lore of {_item} to colored strings("uhc.gui.team_choice.teamFormat.lore", {_p}, ("players;%{_players}%", "joinState;%{_joinState}%"))
+			set slot {_slots::%{_index}%} of open inventory of {_p} to {_item}
+			set {inv::%{_p}%::slot::%{_slots::%{_index}%}%} to loop-value
+			clear {_n}
+		else:
+			set slot {_slots::%{_index}%} of open inventory of {_p} to light blue stained glass pane named "&r"
+	set slot 49 of open inventory of {_p} to barrier named string("uhc.gui.close", {_p})
+	if {host-player::%{_p}%::team} is set:
+		set {_random} to nether star named string("uhc.gui.team_choice.random.name", {_p})
+		set lore of {_random} to colored strings("uhc.gui.team_choice.random.lore", {_p})
+		set slot 50 of open inventory of {_p} to {_random}
+	else:
+		set slot 50 of open inventory of {_p} to blue stained glass pane named "&r"
+	set {cooldown::%{_p}%} to true
+	wait 0.3 second
+	clear {cooldown::%{_p}%}
+
+On inventory click:
+	set {_game} to {host-player::%player%}
+	{inv::%player%} is "teams_%{_game}%"
+	cancel event
+	event-inventory is not player's inventory
+	event-clicktype is not left mouse button with shift or right mouse button with shift
+	{cooldown::%player%} is not true
+	set {cooldown::%player%} to true
+	if event-slot is 49:
+		close player's inventory
+	else if event-slot is 45:
+		{inv::%player%::page::back} is true
+		set {_} to {inv::%player%::page::index}-1
+		uhcTeamsUpdate(player, {_})
+	else if event-slot is 53:
+		{inv::%player%::page::next} is true
+		set {_} to {inv::%player%::page::index}+1
+		uhcTeamsUpdate(player, {_})
+	else if event-slot is 50:
+		{host-player::%player%::team} is set
+		uhcTeamLeave(player)
+	else:
+		set {_id} to {inv::%player%::slot::%index of event-slot%}
+		{_id} is set
+		if {_id} is {host-player::%player%::team}:
+			uhcTeamLeave(player)
+		else:
+			uhcTeamJoin(player, {_id})
+	wait 0.1 second
+	clear {cooldown::%player%}

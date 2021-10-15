@@ -1,0 +1,77 @@
+Options:
+	sound-error: entity.villager.no
+	sound-success: block.note.pling
+	sound-click: ui.button.click
+
+On load:
+	uhcScenariosRegister("cutClean", steak, false)
+
+#
+#     >  Game
+#
+
+#On pickup:
+#	"%event-world%" contain "UHCHOST-"
+#	set {_game} to "%event-world%"
+#	set {_id} to "cutClean"
+#	#
+#	{host::%{_game}%::scenarios::*} contain {_id}
+#	if type of event-item is iron ore:
+#		set {_item} to iron ingot
+#	if type of event-item is gold ore:
+#		set {_item} to gold ingot
+#	if type of event-item is raw porkchop:
+#		set {_item} to cooked porkchop
+#	if type of event-item is raw fish:
+#		set {_item} to cooked fish
+#	if type of event-item is raw salmon:
+#		set {_item} to cooked salmon
+#	if type of event-item is raw beef:
+#		set {_item} to steak
+#	if type of event-item is raw chicken:
+#		set {_item} to cooked chicken
+#	if type of event-item is potato:
+#		set {_item} to baked potato
+#	if type of event-item is raw rabbit:
+#		set {_item} to cooked rabbit
+#	if type of event-item is raw mutton:
+#		set {_item} to cooked mutton
+#	player have space for {_item}
+#	set {_item} to item amount of event-item of {_item}
+#	cancel event
+#	kill event-entity
+#	play sound "entity.item.pickup" with volume 0.2 and pitch 2 at player for player
+#	give {_item} to player
+
+On break of any ore:
+	"%event-world%" contain "UHCHOST-"
+	set {_game} to "%event-world%"
+	set {_id} to "cutClean"
+	#
+	{host::%{_game}%::scenarios::*} contain {_id}
+	clear drops of items
+	set {_blockDrops::*} to drops of event-block using player's tool
+	broadcast "%{_blockDrops::*}%"
+	loop {_blockDrops::*}:
+		set {_item} to loop-value
+		set {_item} to coal if {_item} is coal ore
+		set {_item} to iron ingot if {_item} is iron ore
+		set {_item} to gold ingot if {_item} is gold ore
+		if player's tool is enchanted with fortune 1:
+			chance of 33%:
+				set item amount of {_item} to item amount of {_item}*2
+		else if player's tool is enchanted with fortune 2:
+			chance of 25%:
+				set item amount of {_item} to item amount of {_item}*2
+			else if chance of 25%:
+				set item amount of {_item} to item amount of {_item}*3
+		else if player's tool is enchanted with fortune 3:
+			chance of 20%:
+				set item amount of {_item} to item amount of {_item}*2
+			else if chance of 20%:
+				set item amount of {_item} to item amount of {_item}*3
+			else if chance of 20%:
+				set item amount of {_item} to item amount of {_item}*4
+		else:
+			add {_item} to {_drops::*}
+	drop {_drops::*} at event-block

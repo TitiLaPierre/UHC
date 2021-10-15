@@ -1,0 +1,147 @@
+Function uhcStart(game: text):
+	set {_p} to {host::%{_game}%::host} if {host::%{_game}%::p::*} contain {host::%{_game}%::host}
+	if size of {host::%{_game}%::p::*} < 2:
+		send string("uhc.error.require_more_players", {_p}) to {_p}
+	else:
+		set {_timer} to 10
+		set {_pitch} to 1
+		set level of {host::%{_game}%::p::*} to 10
+		set level progress of {host::%{_game}%::p::*} to 110%
+		set {host::%{_game}%::state} to "starting"
+		uhcScoreWaitingUpdate({host::%{_game}%::p::*})
+		while {_timer} >= 1:
+			if size of {host::%{_game}%::p::*} < 2:
+				loop {host::%{_game}%::p::*}:
+					play sound "entity.villager.no" with volume 0.8 and pitch 1 at loop-value for loop-value
+					send string("uhc.error.require_more_players", loop-value) to loop-value
+					uhcScoreWaitingUpdate(loop-value)
+					set level of loop-value to 0
+					set level progress of loop-value to 0
+				stop
+			if {host::%{_game}%::state} is not "starting":
+				loop {host::%{_game}%::p::*}:
+					play sound "entity.villager.no" with volume 0.8 and pitch 1 at loop-value for loop-value
+					send string("uhc.game_management.starting_canceled", loop-value) to loop-value
+					uhcScoreWaitingUpdate(loop-value)
+					set level of loop-value to 0
+					set level progress of loop-value to 0
+				stop
+			set level of {host::%{_game}%::p::*} to {_timer}
+			loop {host::%{_game}%::p::*}:
+				loop-value is online
+				send action bar string("uhc.game_management.starting_in", loop-value, "time;%{_timer}%") to loop-value
+			play sound "block.note.pling" with volume 0.8 and pitch {_pitch} at {host::%{_game}%::p::*} for {host::%{_game}%::p::*}
+			remove 0.05 from {_pitch}
+			remove 0.1 from level progress of {host::%{_game}%::p::*}
+			set level of {host::%{_game}%::p::*} to {_timer}
+			remove 1 from {_timer}
+			wait 1 second
+
+		#
+		#     >  Loading
+		#
+
+		set {host::%{_game}%::state} to "ingame"
+		set {host::%{_game}%::nodamage} to true
+		if {host::%{_game}%::game::cycle} is "n":
+			set time of world({_game}) to 24:00
+		else if {host::%{_game}%::game::cycle} is "dn":
+			set time of world({_game}) to 6:00
+			set value of gamerule "doDaylightCycle" in world({_game}) to "true"
+		set {_border} to worldborder of world({_game})
+		set diameter of worldborder {_border} over 1 tick to {host::%{_game}%::game::bStart}
+		set worldborder center of {_border} to location(0.5, 0, 0.5, world({_game}))
+		set worldborder buffer of {_border} to 0
+		set worldborder warning distance of {_border} to 10
+		set {_distance} to 360/size of {host::%{_game}%::p::*}
+		set {_d} to 0
+		set {_index} to 1
+		set {_size} to size of {host::%{_game}%::p::*}
+
+		#
+		#     >  Players
+		#
+
+		loop {host::%{_game}%::p::*}:
+			loop-value is online
+			if {host-task::%loop-value%} is "inv_%{_game}%":
+				make loop-value execute command "/cancel"
+			set {_bar} to getBar("■", "&a", "&7", "&a", 10, {_size}, {_index})
+			set {_x} to cos({_d})*100
+			set {_z} to sin({_d})*100
+			loop {host::%{_game}%::p::*}:
+				loop-value-2 is online
+				send action bar string("uhc.game_management.teleport", loop-value-2, "progress;%{_bar}%") to loop-value-2
+			plateform(join {_game} and "players" by "-", location({_x}, 200, {_z}, world({_game})), 5, 3)
+			clear loop-value's inventory
+			set level of loop-value to 0
+			set level progress of loop-value to 0
+			heal loop-value
+			set loop-value's gamemode to adventure
+			set fly mode of loop-value to false
+			delete loop-value's sidebar
+			feed loop-value
+			teleport loop-value at location({_x}, 200, {_z}, world({_game}))
+			add {_distance} to {_d}
+			add 1 to {_index}
+
+		deletePlatform(join {_game} and "lobby" by "-")
+
+		#
+		#     >  Teams
+		#
+
+		loop {host::%{_game}%::teams::*}:
+			set {_size} to size of {host::%{_game}%::game::team::%loop-value%::*}
+			loop ({host::%{_game}%::team} - {_size}) times:
+				add loop-value-1 to {_teamSlots::*}
+		clear {_index}
+
+		#
+		#     >  Team of Players
+		#
+
+		loop shuffled {host::%{_game}%::p::*} where [{host-player::%player input%::team} is not set]:
+			add 1 to {_index}
+			set {_team} to element {_index} of {_teamSlots::*}
+			remove {_team} from {_teamSlots::*}
+			uhcTeamJoin(loop-value, {_team})
+			set {_tabName} to {teams::t::%{_team}%::shortname}
+			if {_tabName} is not set:
+				set display name of loop-value to colored join {_tabName} and "%loop-value%" by " "
+			else:
+				set display name of loop-value to colored join {teams::t::%{_team}%::color} and "%loop-value%"
+			clear {_tabName}
+			
+		#
+		#     >  Amount of team
+		#
+			
+		clear {host::%{_game}%::teams::*}
+		loop {host::%{_game}%::p::*}:
+			add {host-player::%loop-value%::team} to {host::%{_game}%::teams::*} if ({host::%{_game}%::teams::*} doesn't contain {host-player::%loop-value%::team})
+
+		#
+		#     >  Start
+		#
+
+		wait 5 seconds
+		loop {host::%{_game}%::p::*}:
+			deletePlatform(join {_game} and "players" by "-")
+			loop-value is online
+			set loop-value's gamemode to survival
+			set loop-value's helmet to {host::%{_game}%::inv::helmet}
+			set loop-value's chestplate to {host::%{_game}%::inv::chestplate}
+			set loop-value's leggings to {host::%{_game}%::inv::leggings}
+			set loop-value's boots to {host::%{_game}%::inv::boots}
+			loop 36 times:
+				set slot loop-number - 1 of loop-value-1 to {host::%{_game}%::inv::slots::%loop-number - 1%}
+			#
+			add {host-player::%loop-value%::team} to {host::%{_game}%::teams::*} if ({host::%{_game}%::teams::*} doesn't contain {host-player::%loop-value%::team})
+			set {_t} to {host-player::%loop-value%::team}
+			set {_teamName} to string("uhc.teams.%{_t}%", loop-value)
+			send colored strings("uhc.game_management.start", loop-value, "team;%{_teamName}%") to loop-value
+			loop {host::%{_game}%::game::team::%{_t}%::*}:
+				send colored join "&f&l        &f● ", {teams::t::%{_t}%::color} and "%loop-value-2%" to loop-value-1
+			send "" to loop-value
+		uhcGame({_game})

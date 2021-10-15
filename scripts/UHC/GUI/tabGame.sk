@@ -1,0 +1,390 @@
+Options:
+	sound-error: entity.villager.no
+	sound-success: block.note.pling
+	sound-click: ui.button.click
+
+Function uhcHostTabGame(p: player):
+	set {_game} to {host-player::%{_p}%}
+
+	#
+	#     >  PVP
+	#
+
+	if {host::%{_game}%::game::pvp} < 1:
+		set {_pvpTime} to string("uhc.gui.on_start", {_p})
+	else:
+		set {_} to time("%{host::%{_game}%::game::pvp}% seconds" parsed as timespan)
+		set {_pvpTime} to "%{_}%"
+	set {_pvp} to diamond sword with no nbt named string("uhc.gui.game.pvp.name", {_p})
+	set lore of {_pvp} to colored strings("uhc.gui.game.pvp.lore", {_p}, "time;%{_pvpTime}%")
+
+	#
+	#     >  Potions
+	#
+
+	set {_potions} to water bottle with no nbt named string("uhc.gui.game.potions.name", {_p})
+	set lore of {_potions} to colored strings("uhc.gui.game.potions.lore", {_p})
+
+	#
+	#     >  Day Cycle
+	#
+
+	if {host::%{_game}%::game::cycle} is "dn":
+		set {_dayCycleChoice} to join strings("uhc.gui.game.day_night_cycle.day_night", {_p}) by nl
+	else if {host::%{_game}%::game::cycle} is "d":
+		set {_dayCycleChoice} to join strings("uhc.gui.game.day_night_cycle.day", {_p}) by nl
+	else if {host::%{_game}%::game::cycle} is "n":
+		set {_dayCycleChoice} to join strings("uhc.gui.game.day_night_cycle.night", {_p}) by nl
+
+	set {_dayCycle} to sunflower named string("uhc.gui.game.day_night_cycle.name", {_p})
+	set lore of {_dayCycle} to colored strings("uhc.gui.game.day_night_cycle.lore", {_p}, "choice;%{_dayCycleChoice}%")
+
+	#
+	#     >  Nether
+	#
+
+	set {_nether} to netherrack named string("uhc.gui.game.nether.name", {_p})
+	set lore of {_nether} to colored strings("uhc.gui.wip", {_p})
+
+	#
+	#     >  Spectators
+	#
+
+	if {host::%{_game}%::game::spec} is "all":
+		set {_spectatorsChoice} to join strings("uhc.gui.game.spectators.all", {_p}) by nl
+	else if {host::%{_game}%::game::spec} is "players":
+		set {_spectatorsChoice} to join strings("uhc.gui.game.spectators.players", {_p}) by nl
+	else if {host::%{_game}%::game::spec} is "none":
+		set {_spectatorsChoice} to join strings("uhc.gui.game.spectators.none", {_p}) by nl
+
+	set {_spectator} to ender pearl item named string("uhc.gui.game.spectators.name", {_p})
+	set lore of {_spectator} to colored strings("uhc.gui.game.spectators.lore", {_p}, "choice;%{_spectatorsChoice}%")
+
+	#
+	#     >  GUI
+	#
+
+	set slot 20 of open inventory of {_p} to {_pvp}
+	set slot 21 of open inventory of {_p} to {_potions}
+	set slot 22 of open inventory of {_p} to {_dayCycle}
+	set slot 23 of open inventory of {_p} to {_nether}
+	set slot 24 of open inventory of {_p} to {_spectator}
+
+	set {cooldown::%{_p}%} to true
+	wait 0.1 second
+	clear {cooldown::%{_p}%}
+
+On inventory click:
+	event-inventory is not player's inventory
+	set {_game} to {host-player::%player%}
+	{inv::%player%} is "setup_game_%{_game}%"
+	event-clicktype is not left mouse button with shift or right mouse button with shift
+	{cooldown::%player%} is not set
+	set {cooldown::%player%} to true
+	if event-slot is 20:
+		wait a tick
+		uhcHostUpdate(player, "pvp")
+		play sound "{@sound-click}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 21:
+		uhcHostUpdate(player, "potions")
+	else if event-slot is 22:
+		if event-clicktype is left mouse button:
+			if {host::%{_game}%::game::cycle} is "dn":
+				set {host::%{_game}%::game::cycle} to "d"
+			else if {host::%{_game}%::game::cycle} is "d":
+				set {host::%{_game}%::game::cycle} to "n"
+			else:
+				set {host::%{_game}%::game::cycle} to "dn"
+			uhcHostUpdate(player, "game")
+			play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+		else if event-clicktype is right mouse button:
+			if {host::%{_game}%::game::cycle} is "dn":
+				set {host::%{_game}%::game::cycle} to "n"
+			else if {host::%{_game}%::game::cycle} is "d":
+				set {host::%{_game}%::game::cycle} to "dn"
+			else:
+				set {host::%{_game}%::game::cycle} to "d"
+			uhcHostUpdate(player, "game")
+			play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 24:
+		if event-clicktype is left mouse button:
+			if {host::%{_game}%::game::spec} is "all":
+				set {host::%{_game}%::game::spec} to "players"
+			else if {host::%{_game}%::game::spec} is "players":
+				set {host::%{_game}%::game::spec} to "none"
+			else:
+				set {host::%{_game}%::game::spec} to "all"
+			uhcHostUpdate(player, "game")
+			play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+		else if event-clicktype is right mouse button:
+			if {host::%{_game}%::game::spec} is "all":
+				set {host::%{_game}%::game::spec} to "none"
+			else if {host::%{_game}%::game::spec} is "none":
+				set {host::%{_game}%::game::spec} to "players"
+			else:
+				set {host::%{_game}%::game::spec} to "all"
+			uhcHostUpdate(player, "game")
+			play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	wait 0.1 second
+	clear {cooldown::%player%}
+
+Function uhcHostTabPvp(p: player):
+	set {inv::%{_p}%::back} to "game"
+	set {_game} to {host-player::%{_p}%}
+
+	#
+	#     >  Remove
+	#
+
+	if {host::%{_game}%::game::pvp} - 600 >= 0:
+		set {_removeTenMinutes} to red stained glass pane named string("uhc.gui.pvp.remove10min", {_p})
+	if {host::%{_game}%::game::pvp} - 60 >= 0:
+		set {_removeOneMinute} to orange stained glass pane named string("uhc.gui.pvp.remove1min", {_p})
+	if {host::%{_game}%::game::pvp} - 30 >= 0:
+		set {_removeThirtySeconds} to yellow stained glass pane named string("uhc.gui.pvp.remove30s", {_p})
+
+	#
+	#     >  PVP
+	#
+
+	if {host::%{_game}%::game::pvp} < 1:
+		set {_pvpTime} to string("uhc.gui.on_start", {_p})
+	else:
+		set {_} to time("%{host::%{_game}%::game::pvp}% seconds" parsed as timespan)
+		set {_pvpTime} to "%{_}%"
+	set {_pvp} to diamond sword with no nbt named string("uhc.gui.game.pvp.name", {_p})
+	set lore of {_pvp} to colored strings("uhc.gui.game.pvp.lore", {_p}, "time;%{_pvpTime}%")
+	set line 1 of lore of {_pvp} to string("uhc.gui.type.modifier", {_p})
+	clear last element of lore of {_pvp}
+	if {host::%{_game}%::game::pvp} is not 1200:
+		add colored string("uhc.gui.click_type.drop_reset", {_p}) to lore of {_pvp}
+	else:
+		clear last element of lore of {_pvp}
+
+	#
+	#     >  Add
+	#
+
+	if {host::%{_game}%::game::pvp} + 30 <= 1800:
+		set {_addThirtySeconds} to lime stained glass pane named string("uhc.gui.pvp.add30s", {_p})
+	if {host::%{_game}%::game::pvp} + 60 <= 1800:
+		set {_addOneMinute} to green stained glass pane named string("uhc.gui.pvp.add1min", {_p})
+	if {host::%{_game}%::game::pvp} + 600 <= 1800:
+		set {_addTenMinutes} to light blue stained glass pane named string("uhc.gui.pvp.add10min", {_p})
+
+	#
+	#     >  GUI
+	#
+
+	set slot 19 of open inventory of {_p} to {_removeTenMinutes}
+	set slot 20 of open inventory of {_p} to {_removeOneMinute}
+	set slot 21 of open inventory of {_p} to {_removeThirtySeconds}
+
+	set slot 22 of open inventory of {_p} to {_pvp}
+
+	set slot 23 of open inventory of {_p} to {_addThirtySeconds}
+	set slot 24 of open inventory of {_p} to {_addOneMinute}
+	set slot 25 of open inventory of {_p} to {_addTenMinutes}
+
+	set {cooldown::%{_p}%} to true
+	wait 0.1 second
+	clear {cooldown::%{_p}%}
+
+On inventory click:
+	event-inventory is not player's inventory
+	set {_game} to {host-player::%player%}
+	{inv::%player%} is "setup_pvp_%{_game}%"
+	event-clicktype is not left mouse button with shift or right mouse button with shift
+	{cooldown::%player%} is not set
+	set {cooldown::%player%} to true
+	if event-slot is 19:
+		{host::%{_game}%::game::pvp} - 600 >= 0
+		remove 600 from {host::%{_game}%::game::pvp}
+		uhcHostUpdate(player, "pvp")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 20:
+		{host::%{_game}%::game::pvp} - 60 >= 0
+		remove 60 from {host::%{_game}%::game::pvp}
+		uhcHostUpdate(player, "pvp")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 21:
+		{host::%{_game}%::game::pvp} - 30 >= 0
+		remove 30 from {host::%{_game}%::game::pvp}
+		uhcHostUpdate(player, "pvp")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	#
+	else if event-slot is 22:
+		{host::%{_game}%::game::pvp} is not 1200
+		event-clicktype is drop key
+		set {host::%{_game}%::game::pvp} to 1200
+		uhcHostUpdate(player, "pvp")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	#
+	else if event-slot is 23:
+		{host::%{_game}%::game::pvp} + 30 <= 1800
+		add 30 to {host::%{_game}%::game::pvp}
+		uhcHostUpdate(player, "pvp")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 24:
+		{host::%{_game}%::game::pvp} + 60 <= 1800
+		add 60 to {host::%{_game}%::game::pvp}
+		uhcHostUpdate(player, "pvp")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 25:
+		{host::%{_game}%::game::pvp} + 600 <= 1800
+		add 600 to {host::%{_game}%::game::pvp}
+		uhcHostUpdate(player, "pvp")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	wait 0.1 second
+	clear {cooldown::%player%}
+
+Function uhcHostTabPotions(p: player, arg: string="0"):
+	set {inv::%{_p}%::back} to "game"
+	set {_game} to {host-player::%{_p}%}
+
+	#
+	#     >  Long potion
+	#
+
+	if {host::%{_game}%::game::pLong} is true:
+		set {_long} to redstone
+		set {_choice} to join strings("uhc.gui.potions.enabled", {_p}) by nl
+		set {_enableState} to "disable"
+	else:
+		set {_long} to gray dye
+		set {_choice} to join strings("uhc.gui.potions.disabled", {_p}) by nl
+		set {_enableState} to "enable"
+	set name of {_long} to string("uhc.gui.potions.extendedPotions.name", {_p})
+	set lore of {_long} to colored strings("uhc.gui.potions.extendedPotions.lore", {_p}, ("choice;%{_choice}%", "enableState;%{_enableState}%"))
+
+	#
+	#     >  Level potion
+	#
+
+	if {host::%{_game}%::game::pLevel} is true:
+		set {_level} to glowstone dust
+		set {_choice} to join strings("uhc.gui.potions.enabled", {_p}) by nl
+		set {_enableState} to "disable"
+	else:
+		set {_level} to gray dye
+		set {_choice} to join strings("uhc.gui.potions.disabled", {_p}) by nl
+		set {_enableState} to "enable"
+	set name of {_level} to string("uhc.gui.potions.strongPotions.name", {_p})
+	set lore of {_level} to colored strings("uhc.gui.potions.strongPotions.lore", {_p}, ("choice;%{_choice}%", "enableState;%{_enableState}%"))
+
+	#
+	#     >  Content
+	#
+
+	add all integers between 20 and 24 to {_slots::*}
+	add all integers between 29 and 33 to {_slots::*}
+
+	clear slots {_slots::*} of open inventory of {_p}
+
+	set {_page} to {_arg} parsed as integer
+
+	set {_index} to 1
+	set {_index} to 10*{_page}
+	set {_calcBack} to {_index}-1
+	if element {_calcBack} of {host-config::potion::category::base::*} is set:
+		{_calcBack} > 0
+		set {inv::%{_p}%::page::back} to true
+		set slot 37 of open inventory of {_p} to an arrow named string("uhc.gui.back.page_previous", {_p})
+	loop 10 times:
+		add 1 to {_index}
+		add element {_index} of {host-config::potion::category::base::*} to {_return::*}
+	set {_calcNext} to {_index}+1
+	set {inv::%{_p}%::page::index} to {_page}
+	if element {_calcNext} of {host-config::potion::category::base::*} is set:
+		set {inv::%{_p}%::page::next} to true
+		set slot 43 of open inventory of {_p} to an arrow named string("uhc.gui.back.page_next", {_p})
+	set {_index} to 1
+	loop {_return::*}:
+		set {_propId} to "base_%loop-value%"
+		set {_potionId} to {host-config::potion::item::%{_propId}%::resultId}
+		set {_potionName} to string("potions.%loop-value%.name", {_p})
+		if {host::%{_game}%::game::potions::base::*} contains loop-value:
+			set {_item} to {host-config::items::%{_potionId}%}
+			set {_item} to {_item} with all flags hidden
+			set {_choice} to join strings("uhc.gui.potions.enabled", {_p}) by nl
+			set {_enableState} to "disable"
+		else:
+			set {_item} to gray dye
+			set {_choice} to join strings("uhc.gui.potions.disabled", {_p}) by nl
+			set {_enableState} to "enable"
+		loop "base", "extended" and "strong":
+			{host-config::potion::category::%loop-value-2%::*} contain loop-value-1
+			set {_potionType} to string("uhc.gui.potions.tag.%loop-value-2%", {_p})
+			if loop-value-2 is "base":
+				add "&a✔ &8%{_potionType}%" to {_additions::*}
+			else if loop-value-2 is "extended":
+				if {host::%{_game}%::game::pLong} is true:
+					add "&a✔ &8%{_potionType}%" to {_additions::*}
+				else:
+					add "&c✘ &8%{_potionType}%" to {_additions::*}
+			else if loop-value-2 is "strong":
+				if {host::%{_game}%::game::pLevel} is true:
+					add "&a✔ &8%{_potionType}%" to {_additions::*}
+				else:
+					add "&c✘ &8%{_potionType}%" to {_additions::*}
+		set {_additions} to join {_additions::*} by nl
+		set name of {_item} to string("uhc.gui.potions.potionFormat.name", {_p}, "potion;%{_potionName}%")
+		set lore of {_item} to colored strings("uhc.gui.potions.potionFormat.lore", {_p}, ("choice;%{_choice}%", "additions;%{_additions}%", "enableState;%{_enableState}%"))
+		#
+		set {_slot} to {_slots::%{_index}%}
+		set slot {_slot} of open inventory of {_p} to {_item}
+		set {inv::%{_p}%::slot::%{_slot}%} to loop-value
+		add 1 to {_index}
+		clear {_item::*} and {_additions::*}
+
+	#
+	#     >  GUI
+	#
+
+	set slot 18 of open inventory of {_p} to {_long}
+	set slot 27 of open inventory of {_p} to {_level}
+
+	set {cooldown::%{_p}%} to true
+	wait 0.1 second
+	clear {cooldown::%{_p}%}
+
+On inventory click:
+	event-inventory is not player's inventory
+	set {_game} to {host-player::%player%}
+	{inv::%player%} start with "setup_potions_%{_game}%"
+	event-clicktype is not left mouse button with shift or right mouse button with shift
+	{cooldown::%player%} is not set
+	set {cooldown::%player%} to true
+	if index of event-slot is 37:
+		{inv::%player%::page::back} is true
+		set {_} to {inv::%player%::page::index}-1
+		uhcHostUpdate(player, "potions", "%{_}%")
+		play sound "{@sound-click}" with volume 0.8 and pitch 1 at player for player
+	else if index of event-slot is 43:
+		{inv::%player%::page::next} is true
+		set {_} to {inv::%player%::page::index}+1
+		uhcHostUpdate(player, "potions", "%{_}%")
+		play sound "{@sound-click}" with volume 0.8 and pitch 1 at player for player
+	else if index of event-slot is 18:
+		if {host::%{_game}%::game::pLong} is true:
+			clear {host::%{_game}%::game::pLong}
+		else:
+			set {host::%{_game}%::game::pLong} to true
+		uhcHostUpdate(player, "potions", "%{inv::%player%::page::index}%")
+	else if index of event-slot is 27:
+		if {host::%{_game}%::game::pLevel} is true:
+			clear {host::%{_game}%::game::pLevel}
+		else:
+			set {host::%{_game}%::game::pLevel} to true
+		uhcHostUpdate(player, "potions", "%{inv::%player%::page::index}%")
+	else:
+		set {_id} to {inv::%player%::slot::%index of event-slot%}
+		{_id} is set
+		if {host::%{_game}%::game::potions::base::*} contain {_id}:
+			remove {_id} from {host::%{_game}%::game::potions::base::*}
+		else:
+			add {_id} to {host::%{_game}%::game::potions::base::*}
+		uhcHostUpdate(player, "potions", "%{inv::%player%::page::index}%")
+		uhcPotionsCheck({_game})
+	wait 0.1 second
+	clear {cooldown::%player%}

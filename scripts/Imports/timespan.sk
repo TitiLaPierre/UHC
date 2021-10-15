@@ -1,0 +1,59 @@
+Function time(seconds: timespan) :: string:
+
+	set {_seconds} to round up {_seconds}.getTicks_i() / 20
+	
+	#
+	#     >  Days
+	#
+
+	set {_mod} to mod({_seconds}, 86400)
+	set {_calc} to {_seconds} - {_mod}
+	set {_days} to {_calc}/86400
+	remove {_days}*86400 from {_seconds}
+	
+	#
+	#     >  Hours
+	#
+
+	set {_mod} to mod({_seconds}, 3600)
+	set {_calc} to {_seconds} - {_mod}
+	set {_hours} to {_calc}/3600
+	remove {_hours}*3600 from {_seconds}
+	
+	#
+	#     >  Minutes
+	#
+
+	set {_mod} to mod({_seconds}, 60)
+	set {_calc} to {_seconds} - {_mod}
+	set {_minutes} to {_calc}/60
+	remove {_minutes}*60 from {_seconds}
+
+	#
+	#     >  Render
+	#
+
+	clear {_days} if ({_days} is 0)
+	clear {_hours} if ({_hours} is 0)
+	clear {_minutes} if ({_minutes} is 0)
+
+	if {_days} is set:
+		add join "%{_days}%" and "j" to {_time::*}
+	if {_hours} is set:
+		add join "%{_hours}%" and "h" to {_time::*}
+	if {_minutes} is set:
+		add join "%{_minutes}%" and "min" to {_time::*}
+	if {_seconds} is not 0:
+		add join "%{_seconds}%" and "s" to {_time::*}
+
+	return join {_time::*} by " "
+
+#
+#  Schéma:
+#
+#        0        3600    0      1
+#        ^         ^      ^      ^
+#        |         |      |      |
+#  3601 ---> 3601 ---> 1 ---> 1 --
+#     /86400     /3600   /60    /1
+#

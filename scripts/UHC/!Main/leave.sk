@@ -1,0 +1,49 @@
+Function uhcLeave(p: player):
+	if {host-player::%{_p}%} is not set:
+		send string("uhc.error.not_playing", {_p}) to {_p}
+	else:
+		set {_game} to {host-player::%{_p}%}
+		set {_team} to {host-player::%{_p}%::team}
+		if {host::%{_game}%::state} is "waiting" or "starting":
+			send string("uhc.game_management.leave_game", {_p}, ("player;%{_p}%", "players;%size of {host::%{_game}%::p::*} - 1%", "slots;%{host::%{_game}%::slots}%")) to {host::%{_game}%::p::*}
+			remove {_p} from {host::%{_game}%::p::*}
+			loop {host::%{_game}%::p::*}:
+				uhcScoreWaitingUpdate(loop-value)
+			if {host-task::%{_p}%} is set:
+				make {_p} execute command "/cancel"
+			uhcTeamLeave({_p})
+		else if {host::%{_game}%::state} is "ingame":
+			if {host::%{_game}%::p::*} contain {_p}:
+				remove {_p} from {host::%{_game}%::p::*}
+				uhcPartyDeath({_p}, {_none})
+			remove {_p} from {host::%{_game}%::spec::*}
+		else if {host::%{_game}%::state} is "end":
+			remove {_p} from {host::%{_game}%::spec::*}
+		loop {host::%{_game}%::p::*}:
+			uhcTeamsUpdate(loop-value, {inv::%loop-value%::page::index})
+		if {host-player::%{_p}%::toLobby} is set:
+			send string("uhc.game_management.back_to_lobby", {_p}) to {_p}
+			clear {host-player::%{_p}%::toLobby}
+		clear {host-player::%{_p}%::team}
+		set {_p}'s gamemode to adventure
+		clear {_p}'s inventory
+		heal {_p}
+		feed {_p}
+		clear level of {_p}
+		reset {_p}'s display name
+		delete {_p}'s sidebar
+		clear {host-player::%{_p}%}
+		teleport {_p} to spawn of "world"
+		uhcTab()
+
+Every 5 seconds:
+	uhcTab()
+
+On quit:
+	{host-player::%player%} is set
+	uhcLeave(player)
+
+Command /hub:
+	aliases: lobby
+	trigger:
+		uhcLeave(player)

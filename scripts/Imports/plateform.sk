@@ -1,0 +1,141 @@
+Function plateform(id: text, loc: location, size: integer, wall: integer):
+	add {_loc} to {structures::%{_id}%::loc::*}
+	set {structures::%{_id}%::size} to {_size}
+	set {structures::%{_id}%::wall} to {_wall}
+	set {_world} to world of {_loc}
+	if {_size} < 1:
+		send "&cFlatform > Generation error: INVALID_SIZE" to ops
+		send "&cFlatform > Set size to 1" to ops
+		set {_size} to 2
+	if mod({_size}, 2) is 0:
+		send "&cFlatform > Generation error: INVALID_SIZE" to ops
+		send "&cFlatform > Add 1 to the size" to ops
+		add 1 to {_size}
+	# Floor
+	#------
+	set {_rayon} to {_size}-1
+	set {_rayon} to {_rayon}/2
+	set {_y} to y-pos of {_loc}-1
+	set {_z} to z-pos of {_loc}-{_rayon}
+	loop {_size} times:
+		set {_x} to x-pos of {_loc}-{_rayon}
+		loop {_size} times:
+			set block at location({_x}, {_y}, {_z}, {_world}) to light gray stained glass
+			add 1 to {_x}
+		add 1 to {_z}
+	loop {_wall} times:
+		# Wall 1
+		#-------
+		add 1 to {_y}
+		set {_x} to x-pos of {_loc}-{_rayon}
+		set {_z} to z-pos of {_loc}-{_rayon}
+		remove 1 from {_x} and {_z}
+		loop {_size}+2 times:
+			set block at location({_x}, {_y}, {_z}, {_world}) to barrier
+			add 1 to {_x}
+		# Wall 2
+		#-------
+		set {_x} to x-pos of {_loc}+{_rayon}
+		set {_z} to z-pos of {_loc}+{_rayon}
+		add 1 to {_x} and {_z}
+		loop {_size}+2 times:
+			set block at location({_x}, {_y}, {_z}, {_world}) to barrier
+			remove 1 from {_x}
+		# Wall 3
+		#-------
+		set {_x} to x-pos of {_loc}-{_rayon}
+		set {_z} to z-pos of {_loc}-{_rayon}
+		remove 1 from {_x} and {_z}
+		loop {_size}+2 times:
+			set block at location({_x}, {_y}, {_z}, {_world}) to barrier
+			add 1 to {_z}
+		# Wall 4
+		#-------
+		set {_x} to x-pos of {_loc}+{_rayon}
+		set {_z} to z-pos of {_loc}+{_rayon}
+		add 1 to {_x} and {_z}
+		loop {_size}+2 times:
+			set block at location({_x}, {_y}, {_z}, {_world}) to barrier
+			remove 1 from {_z}
+	# Barrier
+	#--------
+	set {_rayon} to {_size}-1
+	set {_rayon} to {_rayon}/2
+	add 1 to {_y}
+	set {_z} to z-pos of {_loc}-{_rayon}
+	loop {_size} times:
+		set {_x} to x-pos of {_loc}-{_rayon}
+		loop {_size} times:
+			set block at location({_x}, {_y}, {_z}, {_world}) to barrier
+			add 1 to {_x}
+		add 1 to {_z}
+
+Function deletePlatform(id: string):
+	set {_loc::*} to {structures::%{_id}%::loc::*}
+	set {_size} to {structures::%{_id}%::size}
+	set {_wall} to {structures::%{_id}%::wall}
+
+	clear {structures::%{_id}%::*}
+
+	loop {_loc::*}:
+		set {_loc} to loop-value
+		set {_world} to world of {_loc}
+
+		# Floor
+		#------
+		set {_rayon} to {_size}-1
+		set {_rayon} to {_rayon}/2
+		set {_y} to y-pos of {_loc}-1
+		set {_z} to z-pos of {_loc}-{_rayon}
+		loop {_size} times:
+			set {_x} to x-pos of {_loc}-{_rayon}
+			loop {_size} times:
+				set block at location({_x}, {_y}, {_z}, {_world}) to air
+				add 1 to {_x}
+			add 1 to {_z}
+		loop {_wall} times:
+			# Wall 1
+			#-------
+			add 1 to {_y}
+			set {_x} to x-pos of {_loc}-{_rayon}
+			set {_z} to z-pos of {_loc}-{_rayon}
+			remove 1 from {_x} and {_z}
+			loop {_size}+2 times:
+				set block at location({_x}, {_y}, {_z}, {_world}) to air
+				add 1 to {_x}
+			# Wall 2
+			#-------
+			set {_x} to x-pos of {_loc}+{_rayon}
+			set {_z} to z-pos of {_loc}+{_rayon}
+			add 1 to {_x} and {_z}
+			loop {_size}+2 times:
+				set block at location({_x}, {_y}, {_z}, {_world}) to air
+				remove 1 from {_x}
+			# Wall 3
+			#-------
+			set {_x} to x-pos of {_loc}-{_rayon}
+			set {_z} to z-pos of {_loc}-{_rayon}
+			remove 1 from {_x} and {_z}
+			loop {_size}+2 times:
+				set block at location({_x}, {_y}, {_z}, {_world}) to air
+				add 1 to {_z}
+			# Wall 4
+			#-------
+			set {_x} to x-pos of {_loc}+{_rayon}
+			set {_z} to z-pos of {_loc}+{_rayon}
+			add 1 to {_x} and {_z}
+			loop {_size}+2 times:
+				set block at location({_x}, {_y}, {_z}, {_world}) to air
+				remove 1 from {_z}
+		# Barrier
+		#--------
+		set {_rayon} to {_size}-1
+		set {_rayon} to {_rayon}/2
+		add 1 to {_y}
+		set {_z} to z-pos of {_loc}-{_rayon}
+		loop {_size} times:
+			set {_x} to x-pos of {_loc}-{_rayon}
+			loop {_size} times:
+				set block at location({_x}, {_y}, {_z}, {_world}) to air
+				add 1 to {_x}
+			add 1 to {_z}

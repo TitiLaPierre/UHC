@@ -1,0 +1,241 @@
+Options:
+	error: &c
+
+	sound-error: entity.villager.no
+	sound-success: block.note.pling
+	sound-click: ui.button.click
+
+Function uhcHostOpen(p: player, tab: text="general", arg: string=""):
+	set {_game} to {host-player::%{_p}%}
+	if {_game} is not set:
+		send string("uhc.error.not_playing", {_p}) to {_p}
+	else if {host::%{_game}%::host} is not {_p}:
+		send string("uhc.error.not_host", {_p}) to {_p}
+	else if {host::%{_game}%::state} is not "waiting" or "starting":
+		send string("uhc.error.cannot_do_that", {_p}) to {_p}
+	else:
+		if {_arg} is "":
+			clear {_arg}
+		open chest inventory with 6 rows named "Éditer la partie" to {_p}
+		
+		#
+		#     >  Border
+		#
+		
+		set slot 0 and 1 and 2 and 3 and 4 and 5 and 6 and 7 and 8 and 9 and 17 and 18 and 26 and 27 and 35 and 36 and 44 and 45 and 46 and 48 and 50 and 52 and 53 of open inventory of {_p} to blue stained glass pane named "&r"
+		
+		#
+		#     >  General
+		#
+
+		set {_general} to lava bucket named string("uhc.gui.main.general.name", {_p})
+		set lore of {_general} to colored strings("uhc.gui.main.general.lore", {_p})
+		
+		#
+		#     >  GameInfo
+		#
+
+		set {_gameinfo} to grass block named string("uhc.gui.main.game.name", {_p})
+		set lore of {_gameinfo} to colored strings("uhc.gui.main.game.lore", {_p})
+		
+		#
+		#     >  Border
+		#
+
+		set {_border} to light blue stained glass named string("uhc.gui.main.border.name", {_p})
+		set lore of {_border} to colored strings("uhc.gui.main.border.lore", {_p})
+
+		#
+		#     >  Inventory
+		#
+
+		set {_inv} to chest named string("uhc.gui.main.inventory.name", {_p})
+		set lore of {_inv} to colored strings("uhc.gui.main.inventory.lore", {_p})
+		
+		#
+		#     >  Scenarios
+		#
+
+		set {_scenarios} to diamond named string("uhc.gui.main.scenarios.name", {_p})
+		set lore of {_scenarios} to colored strings("uhc.gui.main.scenarios.lore", {_p})
+		
+		#
+		#     >  Config
+		#
+
+		set {_config} to ender chest named string("uhc.gui.main.config.name", {_p})
+		set lore of {_config} to colored strings("uhc.gui.main.config.lore", {_p})
+		
+		#
+		#     >  Players
+		#
+
+		set {_players} to gold axe with no nbt named string("uhc.gui.main.manage_players.name", {_p})
+		set lore of {_players} to colored strings("uhc.gui.wip", {_p})
+		
+		#
+		#     >  Delete
+		#
+
+		set {_delete} to redstone block named string("uhc.gui.main.delete.name", {_p})
+		set lore of {_delete} to colored strings("uhc.gui.main.delete.lore", {_p})
+		
+		#
+		#     >  GUI
+		#
+
+		set slot 1 of open inventory of {_p} to {_general}
+		set slot 2 of open inventory of {_p} to {_gameinfo}
+		set slot 3 of open inventory of {_p} to {_border}
+		#
+		set slot 5 of open inventory of {_p} to {_inv}
+		set slot 6 of open inventory of {_p} to {_scenarios}
+		#
+		set slot 26 of open inventory of {_p} to {_config}
+		set slot 35 of open inventory of {_p} to {_players}
+		#
+		set slot 47 of open inventory of {_p} to {_delete}
+
+		uhcHostUpdate({_p}, {_tab})
+
+Function uhcHostUpdate(p: player, tab: text="general", arg: string=""):
+	clear {inv::%{_p}%::*}
+	set {_game} to {host-player::%{_p}%}
+	if {_game} is not set:
+		send string("uhc.error.not_playing", {_p}) to {_p}
+	else if {host::%{_game}%::host} is not {_p}:
+		send string("uhc.error.not_host", {_p}) to {_p}
+	else if {host::%{_game}%::state} is not "waiting" or "starting":
+		send string("uhc.error.cannot_do_that", {_p}) to {_p}
+	else:
+		clear {_arg} if ({_arg} is "")
+		set slot 18, 27, 36 and 53 of open inventory of {_p} to blue stained glass pane named "&r"
+		add all integers between 10 and 16 to {_cs::*}
+		add all integers between 19 and 25 to {_cs::*}
+		add all integers between 28 and 34 to {_cs::*}
+		add all integers between 37 and 43 to {_cs::*}
+		clear slots {_cs::*} of open inventory of {_p}
+		#
+		if {_arg} is not set:
+			set {inv::%{_p}%} to "setup_%{_tab}%_%{_game}%"
+		else:
+			set {inv::%{_p}%} to "setup_%{_tab}%_%{_game}%_%{_arg}%"
+		set {inv::%{_p}%::tab} to {_tab}
+		set {inv::%{_p}%::args} to {_arg}
+		#
+		if {_tab} is "general":
+			uhcHostTabGeneral({_p})
+		else if {_tab} is "game":
+			uhcHostTabGame({_p})
+		else if {_tab} is "border":
+			uhcHostTabBorder({_p})
+		else if {_tab} is "inventory":
+			uhcHostTabInventory({_p})
+		else if {_tab} is "scenario":
+			if {_arg} is set:
+				uhcHostTabScenarios({_p}, {_arg})
+			else:
+				uhcHostTabScenarios({_p})
+		else if {_tab} is "pvp":
+			uhcHostTabPvp({_p})
+		else if {_tab} is "bTime":
+			uhcHostTabBTime({_p})
+		else if {_tab} is "bSpeed":
+			uhcHostTabBSpeed({_p})
+		else if {_tab} is "bStart":
+			uhcHostTabBStart({_p})
+		else if {_tab} is "bEnd":
+			uhcHostTabBEnd({_p})
+		else if {_tab} is "sConfig":
+			uhcHostTabSC({_p}, {_arg})
+		else if {_tab} is "config":
+			uhcHostTabConfig({_p})
+		else if {_tab} is "editConfig":
+			uhcHostTabEditConfig({_p})
+		else if {_tab} is "selectIcon":
+			uhcHostTabSelectIcon({_p}, {_arg})
+		else if {_tab} is "potions":
+			uhcHostTabPotions({_p}, {_arg})
+		#
+		if {inv::%{_p}%::back} is not set:
+			set slot 49 of open inventory of {_p} to barrier named string("uhc.gui.close", {_p})
+		else:
+			set {_page} to {inv::%{_p}%::page::index}
+			set {_back} to arrow named string("uhc.gui.back.name", {_p})
+			set {_gui} to string("uhc.gui.category_name.%{inv::%{_p}%::back}%", {_p})
+			set lore of {_back} to colored strings("uhc.gui.back.lore", {_p}, "gui;%{_gui}%")
+			set slot 49 of open inventory of {_p} to {_back}
+		#
+		if {host::%{_game}%::state} is not "starting":
+			set {_start} to slime ball named string("uhc.gui.main.start.name", {_p})
+			set lore of {_start} to colored strings("uhc.gui.main.start.lore", {_p})
+			set slot 51 of open inventory of {_p} to {_start}
+		else:
+			set {_cancel} to red dye named string("uhc.gui.main.cancel.name", {_p})
+			set lore of {_cancel} to colored strings("uhc.gui.main.cancel.lore", {_p})
+			set slot 51 of open inventory of {_p} to {_cancel}
+
+On inventory click:
+	event-inventory is not player's inventory
+	set {_game} to {host-player::%player%}
+	{inv::%player%} start with "setup_"
+	{inv::%player%} contain "_%{_game}%"
+	set {_tab} to {inv::%player%}
+	replace all "setup_" and "_%{_game}%" in {_tab} with ""
+	set {_b::*} to {_tab} split at "_"
+	remove last element of {_b::*} from {_b::*}
+	set {_tab} to join {_b::*} by "_"
+	cancel event
+	event-clicktype is not left mouse button with shift or right mouse button with shift
+	{cooldown::%player%} is not set
+	if event-slot is 1:
+		{inv::%player%} is not "setup_general_%{_game}%"
+		uhcHostUpdate(player)
+		play sound "{@sound-click}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 2:
+		{inv::%player%} is not "setup_game_%{_game}%"
+		uhcHostUpdate(player, "game")
+		play sound "{@sound-click}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 3:
+		{inv::%player%} is not "setup_border_%{_game}%"
+		uhcHostUpdate(player, "border")
+		play sound "{@sound-click}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 5:
+		{inv::%player%} is not "setup_inventory_%{_game}%"
+		uhcHostUpdate(player, "inventory")
+		play sound "{@sound-click}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 6:
+		{inv::%player%} is not "setup_scenario_%{_game}%"
+		uhcHostUpdate(player, "scenario")
+		play sound "{@sound-click}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 26:
+		{inv::%player%} is not "setup_config_%{_game}%"
+		uhcHostUpdate(player, "config")
+		play sound "{@sound-click}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 47:
+		set {inv::%player%::bypass} to true
+		confirm(player, empty map named string("confirm.delete_game", player, "game;%{_game}%"))
+	else if event-slot is 49:
+		if {inv::%player%::back} is not set:
+			close player's inventory
+		else:
+			set {_} to {inv::%player%::back}
+			clear {inv::%player%::back}
+			uhcHostUpdate(player, {_})
+			play sound "{@sound-click}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 51:
+		if {host::%{_game}%::state} is not "starting":
+			uhcStart({_game})
+			close player's inventory
+		else:
+			set {host::%{_game}%::state} to "waiting"
+			close player's inventory
+
+On inventory close:
+	{inv::%player%::bypass} is not set:
+		clear {inv::%player%}
+		clear {inv::%player%::*}
+		clear {inv-data::%player%::*}
+	clear {inv::%player%::bypass}
+	wait a tick
+	player.updateInventory()

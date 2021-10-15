@@ -1,0 +1,98 @@
+on load:
+	load yml "plugins/UHC/lang.yml" as "lang"
+	loop yml node list "lang" in "lang":
+		set {_langId} to "%loop-node%"
+		replace all "lang." in {_langId} with ""
+		#
+		add {_langId} to {lang::list::*}
+		set {lang::lang::%{_langId}%::name} to yml value "%loop-node%.name" in "lang"
+		set {lang::lang::%{_langId}%::nbt} to yml value "%loop-node%.nbt" in "lang"
+		set {lang::lang::%{_langId}%::lang::*} to yml list "%loop-node%.attach" in "lang"
+		load yml "plugins/UHC/lang/%{_langId}%.yml" as "lang_%{_langId}%"
+	set {lang::default} to yml value "default" in "lang"
+
+on unload:
+	unload all loaded yml
+	clear {lang::list::*}
+	clear {lang::lang::*}
+
+Custom event "uhc.lang_change":
+	event-values: player
+	pattern: [uhc] lang[uage] change
+
+on join:
+	if {lang::p::%player%} is not set:
+		set {lang::p::%player%} to {lang::default}
+		wait 2 seconds
+		play sound "block.note.pling" with volume 0.2 and pitch 2 at player for player
+		send string("lang.defined_default", player, "lang;%{lang::lang::%{lang::default}%::name}%")
+	else:
+		loop {lang::list::*}:
+			{lang::lang::%loop-value%::lang::*} contain player's language
+			set {_check} to true
+		{_check} is not true
+		set {lang::p::%player%} to {lang::default}
+		play sound "block.note.pling" with volume 0.2 and pitch 2 at player for player
+		send string("lang.unsupported_lang", player)
+		send string("lang.defined_default", player, "lang;%{lang::lang::%{lang::default}%::name}%")
+
+Command /lang [<string>]:
+	trigger:
+		if arg 1 is not set:
+			send string("lang.uncorrect_syntax", player)
+		else if {lang::list::*} doesn't contain arg 1:
+			send string("lang.uncorrect_syntax", player)
+		else:
+			set {lang::p::%player%} to arg 1 in lower case
+			play sound "block.note.pling" with volume 0.2 and pitch 2 at player for player
+			send string("lang.defined", player, "lang;%{lang::lang::%arg 1%::name}%")
+			set {_values::player} to player
+			call custom event "uhc.lang_change" with event-values {_values::*}
+
+Function string(id: string, p: offlineplayer, args: strings="") :: string:
+	{_p} is set
+	set {_string} to yml value {_id} in "lang_%{lang::p::%{_p}%}%"
+	clear {_args::*} if ({_args::*} is "")
+	loop {_args::*}:
+		set {_values::*} to loop-value split at ";"
+		replace all "%%%{_values::1}%%%" with {_values::2} in {_string}
+	loop {_string} split at "":
+		if {_ymlId} is not set:
+			loop-value is "{"
+			set {_ymlId} to ""
+		if {_ymlId} is set:
+			set {_ymlId} to join {_ymlId} and loop-value
+			if loop-value is "}":
+				set {_stop} to true
+		{_stop} is true
+		replace "{" and "}" in {_ymlId} with ""
+		replace all "{%{_ymlId}%}" in {_string} with string({_ymlId}, {_p})
+		clear {_stop}
+		clear {_ymlId}
+	set {_string} to {_id} if ({_string} is not set)
+	return {_string}
+
+
+Function strings(id: string, p: offlineplayer, args: strings="") :: strings:
+	{_p} is set
+	set {_strings::*} to yml list {_id} in "lang_%{lang::p::%{_p}%}%"
+	clear {_args::*} if ({_args::*} is "")
+	loop {_args::*}:
+		set {_values::*} to loop-value split at ";"
+		replace all "%%%{_values::1}%%%" with {_values::2} in {_strings::*}
+	loop {_strings::*}:
+		loop loop-value split at "":
+			if {_ymlId} is not set:
+				loop-value-2 is "{"
+				set {_ymlId} to ""
+			if {_ymlId} is set:
+				set {_ymlId} to join {_ymlId} and loop-value-2
+				if loop-value-2 is "}":
+					set {_stop} to true
+			{_stop} is true
+			replace "{" and "}" in {_ymlId} with ""
+			replace all "{%{_ymlId}%}" in {_strings::*} with string({_ymlId}, {_p})
+			clear {_stop}
+			clear {_ymlId}
+	set {_strings::*} to {_id} if ({_strings::*} is not set)
+	return {_strings::*}

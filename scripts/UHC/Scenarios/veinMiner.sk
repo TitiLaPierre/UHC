@@ -1,0 +1,29 @@
+Options:
+	sound-error: entity.villager.no
+	sound-success: block.note.pling
+	sound-click: ui.button.click
+
+On load:
+	uhcScenariosRegister("veinMiner", diamond ore, false)
+
+#
+#     >  Game
+#
+
+On break any ore:
+	"%event-world%" contain "UHCHOST-"
+	set {_game} to "%event-world%"
+	set {_id} to "veinMiner"
+	#
+	{host::%{_game}%::scenarios::*} contain {_id}
+	set {_type} to type of event-block
+	set {_type} to redstone ore if (type of event-block is redstone ore)
+	veinMiner({_type}, event-location, player's tool, false)
+
+Function veinMiner(blockType: itemtype, loc: location, tool: item, break: boolean):
+	break block at {_loc} naturally using {_tool} if ({_break} is true)
+	play sound "block.wood.break" with volume 2 and pitch 1 at {_loc} for players
+	wait a tick
+	loop blocks in radius 1.5 of {_loc}:
+		{_blockType} is type of loop-block
+		veinMiner({_blockType}, location of loop-block, {_tool}, true)

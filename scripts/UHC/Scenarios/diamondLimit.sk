@@ -1,0 +1,121 @@
+Options:
+	sound-error: entity.villager.no
+	sound-success: block.note.pling
+	sound-click: ui.button.click
+
+On load:
+	uhcScenariosRegister("diamondLimit", diamond pickaxe, true)
+
+on uhc scenario disable:
+	set {_id} to "diamondLimit"
+	event-string is {_id}
+	set {_game} to {host-player::%player%}
+	clear {host::%{_game}%::sConfig::%{_id}%::*}
+
+on uhc scenario enable:
+	set {_id} to "diamondLimit"
+	event-string is {_id}
+	set {_game} to {host-player::%player%}
+	set {host::%{_game}%::sConfig::%{_id}%::limit} to 19
+
+On uhc scenario config:
+	set {_id} to "diamondLimit"
+	event-string is {_id}
+	set {_game} to {host-player::%player%}
+	set {_limit} to {host::%{_game}%::sConfig::%{_id}%::limit}
+
+	#
+	#     >  Remove
+	#
+
+	if {_limit} - 5 >= 5:
+		set {_removeFive} to orange stained glass pane named string("scenarios.diamondLimit.gui.remove5", player)
+	if {_limit} - 1 >= 5:
+		set {_removeOne} to yellow stained glass pane named string("scenarios.diamondLimit.gui.remove1", player)
+
+	#
+	#     >  DiamondLimit
+	#
+
+	set {_scenarioName} to string("scenarios.%{_id}%.name", player)
+	set {_lore} to join strings("scenarios.%{_id}%.lore", player) by nl
+	set {_item} to {scenarios::s::%{_id}%::item} with no nbt named string("uhc.gui.scenarios.scenarioFormat.name", player, "name;%{_scenarioName}%")
+	set lore of {_item} to colored strings("uhc.gui.scenarios.scenarioFormat.lore", player, "lore;%{_lore}%")
+	clear last element of lore of {_item}
+	clear last element of lore of {_item}
+	add string("scenarios.%{_id}%.gui.limit", player, "limit;%{_limit}%") to lore of {_item}
+	if {_limit} is not 19:
+		add "" to lore of {_item}
+		add colored string("uhc.gui.click_type.drop_reset", player) to lore of {_item}
+
+	#
+	#     >  Add
+	#
+
+	if {_limit} + 1 <= 31:
+		set {_addOne} to lime stained glass pane named string("scenarios.diamondLimit.gui.add1", player)
+	if {_limit} + 5 <= 31:
+		set {_addFive} to green stained glass pane named string("scenarios.diamondLimit.gui.add5", player)
+
+	#
+	#     >  GUI
+	#
+
+	set slot 20 of open inventory of player to {_removeFive}
+	set slot 21 of open inventory of player to {_removeOne}
+
+	set slot 22 of open inventory of player to {_item}
+
+	set slot 23 of open inventory of player to {_addOne}
+	set slot 24 of open inventory of player to {_addFive}
+
+On inventory click:
+	set {_id} to "diamondLimit"
+	event-inventory is not player's inventory
+	set {_game} to {host-player::%player%}
+	{inv::%player%} is "setup_sConfig_%{_game}%_%{_id}%"
+	if event-slot is 20:
+		{host::%{_game}%::sConfig::%{_id}%::limit} - 5 >= 5
+		remove 5 from {host::%{_game}%::sConfig::%{_id}%::limit}
+		uhcHostUpdate(player, "sConfig", {_id})
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 21:
+		{host::%{_game}%::sConfig::%{_id}%::limit} - 1 >= 5
+		remove 1 from {host::%{_game}%::sConfig::%{_id}%::limit}
+		uhcHostUpdate(player, "sConfig", {_id})
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 22:
+		{host::%{_game}%::sConfig::%{_id}%::limit} is not 19
+		event-clicktype is drop key
+		set {host::%{_game}%::sConfig::%{_id}%::limit} to 19
+		uhcHostUpdate(player, "sConfig", {_id})
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 23:
+		{host::%{_game}%::sConfig::%{_id}%::limit} + 1 <= 31
+		add 1 to {host::%{_game}%::sConfig::%{_id}%::limit}
+		uhcHostUpdate(player, "sConfig", {_id})
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 24:
+		{host::%{_game}%::sConfig::%{_id}%::limit} + 5 <= 31
+		add 5 to {host::%{_game}%::sConfig::%{_id}%::limit}
+		uhcHostUpdate(player, "sConfig", {_id})
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+
+#
+#     >  Game
+#
+
+On break diamond ore:
+	"%event-world%" contain "UHCHOST-"
+	set {_game} to "%event-world%"
+	set {_id} to "diamondLimit"
+	#
+	if {host::%{_game}%::sConfig::%{_id}%::p::%player%} >= {host::%{_game}%::sConfig::%{_id}%::limit}:
+		clear drops of items
+		send title "" with subtitle string("scenarios.diamondLimit.limit_error", player) to player
+		play sound "entity.endermen.teleport" with volume 1 and pitch 0.5 at player for player
+		stop
+	add 1 to {host::%{_game}%::sConfig::%{_id}%::p::%player%}
+	{host::%{_game}%::sConfig::%{_id}%::p::%player%} is {host::%{_game}%::sConfig::%{_id}%::limit}
+	play sound "entity.blaze.death" with volume 1 and pitch 2 at player for player
+	send string("scenarios.diamondLimit.limit_warn", player) to player

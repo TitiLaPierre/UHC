@@ -1,0 +1,266 @@
+options:
+	sound-click: ui.button.click
+
+import:
+	org.bukkit.event.player.PlayerAnimationEvent
+	org.bukkit.event.player.PlayerAnimationType
+
+On click with brewing stand:
+	"%player's world%" contain "UHCHOST-"
+	set {_game} to "%player's world%"
+	{host::%{_game}%::state} is "ingame"
+	cancel event
+	{inv::%player%} is not "brewing_stand"
+	openBrewingStand(player)
+
+on PlayerAnimationEvent:
+	set {_p} to event.getPlayer()
+	"%{_p}'s world%" contain "UHCHOST-"
+	set {_game} to "%{_p}'s world%"
+	{host::%{_game}%::state} is "ingame"
+	event.getAnimationType() is PlayerAnimationType.ARM_SWING
+	{inv::%{_p}%} is not "brewing_stand"
+	{_p}'s tool is a brewing stand
+	openBrewingStand({_p})
+
+on pickup:
+	{inv::%player%} is "brewing_stand"
+	wait a tick
+	updateBrewingStand(player, {inv::%player%::type}, {inv::%player%::addition}, {inv::%player%::page})
+
+Function openBrewingStand(p: player):
+	set {inv::%{_p}%} to "brewing_stand"
+	set {_game} to {host-player::%{_p}%}
+	open chest inventory with 6 rows named string("uhc.gui.brewing_stand.name", {_p}) to {_p}
+	updateBrewingStand({_p}, "normal", "base", {_none})
+	
+Function updateBrewingStand(p: player, potionType: string, potionAddition: string, page: integer):
+	set {_game} to {host-player::%{_p}%}
+	set {_page} to 0 if ({_page} is not set)
+
+	#
+	#     >  Normal Potion
+	#
+
+	set {_normal} to water bottle with all flags hidden named string("uhc.gui.brewing_stand.normal.name", {_p})
+	set lore of {_normal} to colored strings("uhc.gui.brewing_stand.normal.lore", {_p})
+	if {_potionType} is "normal":
+		set {_normal} to glowing {_normal}
+		clear last element of lore of {_normal}
+		add string("uhc.gui.click_type.selected", {_p}) to lore of {_normal}
+
+	#
+	#     >  Splash Potion
+	#
+
+	set {_splash} to splash potion of water with all flags hidden named string("uhc.gui.brewing_stand.splash.name", {_p})
+	set lore of {_splash} to colored strings("uhc.gui.brewing_stand.splash.lore", {_p})
+	if {_potionType} is "splash":
+		set {_splash} to glowing {_splash}
+		clear last element of lore of {_splash}
+		add string("uhc.gui.click_type.selected", {_p}) to lore of {_splash}
+
+	#
+	#     >  Base Potion
+	#
+
+	set {_base} to brewing stand named string("uhc.gui.brewing_stand.base.name", {_p})
+	set lore of {_base} to colored strings("uhc.gui.brewing_stand.base.lore", {_p})
+	if {_potionAddition} is "base":
+		set {_base} to glowing {_base}
+		clear last element of lore of {_base}
+		add string("uhc.gui.click_type.selected", {_p}) to lore of {_base}
+
+	#
+	#     >  Extended Potion
+	#
+
+	set {_extended} to redstone named string("uhc.gui.brewing_stand.extended.name", {_p})
+	set lore of {_extended} to colored strings("uhc.gui.brewing_stand.extended.lore", {_p})
+	if {_potionAddition} is "extended":
+		set {_extended} to glowing {_extended}
+		clear last element of lore of {_extended}
+		add string("uhc.gui.click_type.selected", {_p}) to lore of {_extended}
+
+	#
+	#     >  Strong Potion
+	#
+
+	set {_strong} to glowstone dust named string("uhc.gui.brewing_stand.strong.name", {_p})
+	set lore of {_strong} to colored strings("uhc.gui.brewing_stand.strong.lore", {_p})
+	if {_potionAddition} is "strong":
+		set {_strong} to glowing {_strong}
+		clear last element of lore of {_strong}
+		add string("uhc.gui.click_type.selected", {_p}) to lore of {_strong}
+
+	add integers between 0 and 53 to {_border::*}
+	remove 0, 9, 27, 36, 45, 49 and {_slots::*} from {_border::*}
+
+	set slot {_border::*} of open inventory of {_p} to blue stained glass pane named "&r"
+
+	set slot 0 of open inventory of {_p} to {_normal}
+	set slot 9 of open inventory of {_p} to {_splash}
+	set slot 27 of open inventory of {_p} to {_base}
+	set slot 36 of open inventory of {_p} to {_extended} if ({host::%{_game}%::game::pLong} is true)
+	set slot 45 of open inventory of {_p} to {_strong} if ({host::%{_game}%::game::pLevel} is true)
+	set slot 49 of open inventory of {_p} to barrier named string("uhc.gui.close", {_p})
+
+	set slot 36 of open inventory of {_p} to blue stained glass pane named "&r" if ({host::%{_game}%::game::pLong} is not set)
+	set slot 45 of open inventory of {_p} to blue stained glass pane named "&r" if ({host::%{_game}%::game::pLevel} is not set)
+
+	add all integers between 11 and 16 to {_slots::*}
+	add all integers between 20 and 25 to {_slots::*}
+	add all integers between 29 and 34 to {_slots::*}
+	add all integers between 38 and 43 to {_slots::*}
+
+	add integers between 0 and 53 to {_border::*}
+	remove 0, 9, 27, 36, 45, 49 and {_slots::*} from {_border::*}
+
+	clear slots {_slots::*} of open inventory of {_p}
+
+	set {inv::%{_p}%::page} to {_page}
+	set {inv::%{_p}%::type} to {_potionType}
+	set {inv::%{_p}%::addition} to {_potionAddition}
+
+	set {_index} to 1
+	set {_index} to 10*{_page}
+	set {_calcBack} to {_index}-1
+	if element {_calcBack} of {host::%{_game}%::game::potions::%{_potionAddition}%::*} is set:
+		{_calcBack} > 0
+		set {inv::%{_p}%::page::back} to true
+		set slot 46 of open inventory of {_p} to an arrow named string("uhc.gui.back.page_previous", {_p})
+	loop 24 times:
+		add 1 to {_index}
+		if element {_index} of {host::%{_game}%::game::potions::%{_potionAddition}%::*} is set:
+			add element {_index} of {host::%{_game}%::game::potions::%{_potionAddition}%::*} to {_return::*}
+		else:
+			add false to {_return::*}
+	set {_calcNext} to {_index}+1
+	set {inv::%{_p}%::page::index} to {_page}
+	if element {_calcNext} of {host::%{_game}%::game::potions::%{_potionAddition}%::*} is set:
+		set {inv::%{_p}%::page::next} to true
+		set slot 52 of open inventory of {_p} to an arrow named string("uhc.gui.back.page_next", {_p})
+	set {_index} to 1
+	loop {_return::*}:
+		set {_propId} to "%{_potionAddition}%_%loop-value%"
+		set {_slot} to {_slots::%{_index}%}
+		if loop-value is false:
+			set {_item} to light blue stained glass pane named "&r"
+		else:
+			if {_potionType} is "normal":
+				set {_itemId} to {host-config::potion::item::%{_propId}%::resultId}
+			else:
+				set {_itemId} to {host-config::potion::item::%{_propId}%::splashResultId}
+			set {_item} to {host-config::items::%{_itemId}%}
+			set {_item} to {_item} with all flags hidden
+			#
+			set {_potionName} to string("potions.%loop-value%.name", {_p})
+			set {_effectName} to string("potions.%loop-value%.effect", {_p})
+			set {_effectName} to string("uhc.gui.brewing_stand.format.formatStrong", {_p}, "effect;%{_effectName}%") if ({_potionAddition} is "strong")
+			if {host-config::potion::item::%{_propId}%::duration} is not -1:
+				set {_duration} to time("%{host-config::potion::item::%{_propId}%::duration}% seconds" parsed as timespan)
+			else:
+				set {_duration} to string("uhc.gui.brewing_stand.format.instant", {_p})
+			set {_costId::*} to {host-config::potion::item::%{_propId}%::cost::*}
+			add "gun_powder" to {_costId::*} if ({_potionType} is "splash")
+			set {_inventoryCopy::*} to items of {_p}'s inventory
+			loop {_costId::*}:
+				while {_costId::*} contain loop-value-2:
+					remove loop-value-2 from {_costId::*}
+					add 1 to {_amount}
+				set {_amountString} to " &8x%{_amount}%" if ({_amount} > 1)
+				loop {_amount} times:
+					if {_inventoryCopy::*} doesn't contain {_amount} of {host-config::items::%loop-value-2%}:
+						set {_can} to false
+						set {_lineCan} to false
+						stop loop
+					else:
+						remove {host-config::items::%loop-value-2%} from {_inventoryCopy::*}
+				if {_lineCan} is false:
+					add join "&c" and string("items.%loop-value-2%", {_p}) and {_amountString} to {_cost::*}
+				else:
+					add join "&9" and string("items.%loop-value-2%", {_p}) and {_amountString} to {_cost::*}
+				clear {_lineCan}, {_amount} and {_amountString}
+			#
+			set {_cost} to join {_cost::*} by nl
+			#
+			set name of {_item} to string("uhc.gui.brewing_stand.format.name", {_p}, "name;%{_potionName}%")
+			set lore of {_item} to colored strings("uhc.gui.brewing_stand.format.lore", {_p}, ("effect;%{_effectName}%", "duration;%{_duration}%", "cost;%{_cost}%"))
+			if {_can} is false:
+				clear last element of lore of {_item}
+				clear last element of lore of {_item}
+			else:
+				if {_potionType} is "normal":
+					set {_itemId} to {host-config::potion::item::%{_propId}%::resultId}
+				else:
+					set {_itemId} to {host-config::potion::item::%{_propId}%::splashResultId}
+				{_p} doesn't have space for 3 of {host-config::items::%{_itemId}%}
+				clear last element of lore of {_item}
+				add colored strings("uhc.gui.brewing_stand.format.not_enough_place", {_p}) to lore of {_item}
+			set {inv::%{_p}%::slot::%{_slot}%} to loop-value
+			clear {_cost::*}
+		#
+		set slot {_slot} of open inventory of {_p} to {_item}
+		#
+		add 1 to {_index}
+		clear {_can}
+		clear {_t}
+
+On inventory click:
+	{inv::%player%} is "brewing_stand"
+	set {_game} to {host-player::%player%}
+	cancel event
+	event-inventory is not player's inventory
+	event-clicktype is not left mouse button with shift or right mouse button with shift
+	if index of event-slot is 0:
+		{inv::%player%::type} is not "normal"
+		updateBrewingStand(player, "normal", {inv::%player%::addition}, {inv::%player%::page})
+		play sound "{@sound-click}" with volume 0.8 and pitch 1 at player for player
+	else if index of event-slot is 9:
+		{inv::%player%::type} is not "splash"
+		updateBrewingStand(player, "splash", {inv::%player%::addition}, {inv::%player%::page})
+		play sound "{@sound-click}" with volume 0.8 and pitch 1 at player for player
+	else if index of event-slot is 27:
+		{inv::%player%::addition} is not "base"
+		updateBrewingStand(player, {inv::%player%::type}, "base", {inv::%player%::page})
+		play sound "{@sound-click}" with volume 0.8 and pitch 1 at player for player
+	else if index of event-slot is 36:
+		{host::%{_game}%::game::pLong} is true
+		{inv::%player%::addition} is not "extended"
+		updateBrewingStand(player, {inv::%player%::type}, "extended", {inv::%player%::page})
+		play sound "{@sound-click}" with volume 0.8 and pitch 1 at player for player
+	else if index of event-slot is 45:
+		{host::%{_game}%::game::pLevel} is true
+		{inv::%player%::addition} is not "strong"
+		updateBrewingStand(player, {inv::%player%::type}, "strong", {inv::%player%::page})
+		play sound "{@sound-click}" with volume 0.8 and pitch 1 at player for player
+	else if index of event-slot is 49:
+		close player's inventory
+	else:
+		set {_slot} to index of event-slot
+		set {_id} to {inv::%player%::slot::%{_slot}%}
+		{_id} is set
+		set {_propId} to "%{inv::%player%::addition}%_%{_id}%"
+		set {_costId::*} to {host-config::potion::item::%{_propId}%::cost::*}
+		add "gun_powder" to {_costId::*} if ({inv::%player%::type} is "splash")
+		set {_inventoryCopy::*} to items of player's inventory
+		loop {_costId::*}:
+			add {host-config::items::%loop-value%} to {_removedItems::*}
+			if {_inventoryCopy::*} doesn't contain {host-config::items::%loop-value%}:
+				set {_can} to false
+				stop loop
+			else:
+				remove {host-config::items::%loop-value%} from {_inventoryCopy::*}
+		{_can} is not false
+		if {inv::%player%::type} is "normal":
+			set {_itemId} to {host-config::potion::item::%{_propId}%::resultId}
+		else:
+			set {_itemId} to {host-config::potion::item::%{_propId}%::splashResultId}
+		player has space for 3 of {host-config::items::%{_itemId}%}
+		remove {_removedItems::*} from player
+		give 3 of {host-config::items::%{_itemId}%} to player
+		updateBrewingStand(player, {inv::%player%::type}, {inv::%player%::addition}, {inv::%player%::page})
+
+On pickup:
+	{inv::%player%} is "brewing_stand"
+	updateBrewingStand(player, {inv::%player%::type}, {inv::%player%::addition}, {inv::%player%::page})

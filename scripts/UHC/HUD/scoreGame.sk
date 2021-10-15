@@ -1,0 +1,67 @@
+Function uhcScoreGameOpen(p: player):
+	{_p} is set
+	wipe {_p}'s sidebar
+	set {_game} to {host-player::%{_p}%}
+	set name of sidebar of {_p} to {host::%{_game}%::name}
+	set {_team} to {host-player::%{_p}%::team}
+	if {host::%{_game}%::timer} >= {host::%{_game}%::game::pvp}:
+		set {_pvp} to string("uhc.scoreboard.activated", {_p})
+	else:
+		set {_pvp} to difference between {host::%{_game}%::timer} and {host::%{_game}%::game::pvp}
+		set {_pvp} to time("%{_pvp}% seconds" parsed as timespan)
+	if {host::%{_game}%::timer} >= {host::%{_game}%::game::bTime}:
+		set {_border} to string("uhc.scoreboard.activated", {_p})
+	else:
+		set {_border} to difference between {host::%{_game}%::timer} and {host::%{_game}%::game::bTime}
+		set {_border} to time("%{_border}% seconds" parsed as timespan)
+	if {host::%{_game}%::p::*} contain {_p}:
+		set {_teamName} to uhcGetFormattedTeam({_team}, {_p})
+	else if {host::%{_game}%::spec::*} contain {_p}:
+		set {_teamName} to string("uhc.scoreboard.spectator", {_p})
+	set {_timer} to "0s"
+	set {_scoreboard::*} to strings("uhc.scoreboard.game", {_p}, ("timer;%{_timer}%", "team;%{_teamName}%", "teamsleft;%size of {host::%{_game}%::teams::*}%", "playersleft;%size of {host::%{_game}%::p::*}%", "pvp;%{_pvp}%", "border;%{_border}%"))
+	loop reversed {_scoreboard::*}:
+		add 1 to {_index}
+		if {_index} is 1:
+			set id based score colored "%loop-value%" in sidebar of {_p} to {_index} with id "%{_p}%.%{_game}%.border"
+		else if {_index} is 2:
+			set id based score colored "%loop-value%" in sidebar of {_p} to {_index} with id "%{_p}%.%{_game}%.pvp"
+		else if {_index} is 4:
+			set id based score colored "%loop-value%" in sidebar of {_p} to {_index} with id "%{_p}%.%{_game}%.players"
+		else if {_index} is 5:
+			{host::%{_game}%::team} is not 1
+			set id based score colored "%loop-value%" in sidebar of {_p} to {_index} with id "%{_p}%.%{_game}%.teams"
+		else if {_index} is 8:
+			set id based score colored "%loop-value%" in sidebar of {_p} to {_index} with id "%{_p}%.%{_game}%.timer"
+		else:
+			set score colored "%loop-value%" in sidebar of {_p} to {_index}
+
+
+Function uhcScoreGameUpdate(p: player):
+	{_p} is set
+	set {_game} to {host-player::%{_p}%}
+	set {_team} to {host-player::%{_p}%::team}
+	set {_timer} to time("%{host::%{_game}%::timer}% seconds" parsed as timespan)
+	if {host::%{_game}%::timer} >= {host::%{_game}%::game::pvp}:
+		set {_pvp} to string("uhc.scoreboard.activated", {_p})
+	else:
+		set {_pvp} to difference between {host::%{_game}%::timer} and {host::%{_game}%::game::pvp}
+		set {_pvp} to time("%{_pvp}% seconds" parsed as timespan)
+	if {host::%{_game}%::timer} >= {host::%{_game}%::game::bTime}:
+		set {_border} to string("uhc.scoreboard.activated", {_p})
+	else:
+		set {_border} to difference between {host::%{_game}%::timer} and {host::%{_game}%::game::bTime}
+		set {_border} to time("%{_border}% seconds" parsed as timespan)
+	set {_scoreboard::*} to reversed strings("uhc.scoreboard.game", {_p}, ("timer;%{_timer}%", "team;%colored {teams::t::%{_team}%::fullname}%", "teamsleft;%size of {host::%{_game}%::teams::*}%", "playersleft;%size of {host::%{_game}%::p::*}%", "pvp;%{_pvp}%", "border;%{_border}%"))
+	update score with id "%{_p}%.%{_game}%.border" to colored {_scoreboard::1} and 1
+	update score with id "%{_p}%.%{_game}%.pvp" to colored {_scoreboard::2} and 2
+	update score with id "%{_p}%.%{_game}%.players" to colored {_scoreboard::4} and 4
+	if {host::%{_game}%::team} is not 1:
+		update score with id "%{_p}%.%{_game}%.teams" to colored {_scoreboard::5} and 5
+	update score with id "%{_p}%.%{_game}%.timer" to colored {_scoreboard::8} and 8
+
+On uhc lang change:
+	set {_game} to {host-player::%player%}
+	{_game} is set
+	{host::%{_game}%::state} is "ingame"
+	uhcScoreGameOpen(player)

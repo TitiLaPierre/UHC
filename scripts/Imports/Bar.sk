@@ -1,0 +1,12 @@
+Function getBar(symbol: text, filled: text, unfilled: text, full: text, segment: int, max: int, value: int) :: text:
+	set {_size} to {_max}/{_segment}
+	set {_need} to {_size}
+	loop {_segment} times:
+		if {_value} >= {_max}:
+			add "%{_full}%%{_symbol}%" to {_l::*}
+		else if {_value} >= {_need}:
+			add "%{_filled}%%{_symbol}%" to {_l::*}
+		else:
+			add "%{_unfilled}%%{_symbol}%" to {_l::*}
+		add {_size} to {_need}
+	return join {_l::*} by ""

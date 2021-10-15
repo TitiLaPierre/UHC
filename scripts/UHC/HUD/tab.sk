@@ -1,0 +1,39 @@
+Function uhcTab():
+	loop all players:
+		set {_game} to {host-player::%loop-player%}
+		if {_game} is set:
+			#
+			if {host::%{_game}%::state} is "waiting" or "starting":
+				set {_s} to string("uhc.game_management.state_waiting", loop-player)
+			else if {host::%{_game}%::state} is "ingame":
+				set {_s} to string("uhc.game_management.state_ingame", loop-player)
+			else if {host::%{_game}%::state} is "end":
+				set {_s} to string("uhc.game_management.state_end", loop-player)
+			add strings("uhc.tab", loop-player, ("game;%uncolored {host::%{_game}%::name}%", "host;%{host::%{_game}%::host}%", "state;%{_s}%")) to {_header::*}
+			#
+			add "" to {_footer::*}
+			add "&7%{_game} in upper case%" to {_footer::*}
+			#
+			set tab header to colored join {_header::*} by nl and footer to colored join {_footer::*} by nl for loop-player
+			#
+			if {host-player::%loop-player%::team} is set:
+				set {_p} to uhcGetFormattedPlayer(loop-player)
+			else:
+				set {_p} to "&f%loop-player%"
+			if {host::%{_game}%::spec::*} contain loop-player:
+				set display name of tab of loop-player to colored join {_p} and "&7(Spec)" by " "
+			else:
+				set display name of tab of loop-player to colored {_p}
+			hide tab of loop-player for all players where [world of player input is not loop-player's world]
+			show tab of loop-player for {host::%{_game}%::p::*}
+			clear {_header::*}
+			clear {_tabName}
+			clear {_team}
+			clear {_footer::*}
+		else:
+			hide tab of loop-player for all players
+			show tab of loop-player for all players where [world of player input is loop-player's world]
+			set tab header to "" and footer to "" for loop-player
+
+On uhc lang change:
+	uhcTab()

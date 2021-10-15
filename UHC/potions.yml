@@ -1,0 +1,251 @@
+#
+#     >  Base
+#
+base:
+  night_vision:
+    result: "night_vision_potion"
+    duration: 180
+    cost:
+      - "water_bottle"
+      - "water_bottle"
+      - "water_bottle"
+      - "nether_wart"
+      - "golden_carrot"
+  invisibility:
+    result: "invisibility_potion"
+    duration: 180
+    cost:
+      - "night_vision_potion"
+      - "night_vision_potion"
+      - "night_vision_potion"
+      - "fermented_spider_eye"
+  leaping:
+    result: "leaping_potion"
+    duration: 180
+    cost:
+      - "water_bottle"
+      - "water_bottle"
+      - "water_bottle"
+      - "nether_wart"
+      - "rabbit_foot"
+  fire_resistance:
+    result: "fire_resistance_potion"
+    duration: 180
+    cost:
+      - "water_bottle"
+      - "water_bottle"
+      - "water_bottle"
+      - "nether_wart"
+      - "magma_cream"
+  speed:
+    result: "speed_potion"
+    duration: 180
+    cost:
+      - "water_bottle"
+      - "water_bottle"
+      - "water_bottle"
+      - "nether_wart"
+      - "sugar"
+  slowness:
+    result: "slowness_potion"
+    duration: 90
+    cost:
+      - "speed_potion"
+      - "speed_potion"
+      - "speed_potion"
+      - "fermented_spider_eye"
+  water_breathing:
+    result: "water_breathing_potion"
+    duration: 180
+    cost:
+      - "water_bottle"
+      - "water_bottle"
+      - "water_bottle"
+      - "nether_wart"
+      - "pufferfish"
+  health:
+    result: "health_potion"
+    duration: -1
+    cost:
+      - "water_bottle"
+      - "water_bottle"
+      - "water_bottle"
+      - "nether_wart"
+      - "golden_melon"
+  harming:
+    result: "harming_potion"
+    duration: -1
+    cost:
+      - "health_potion"
+      - "health_potion"
+      - "health_potion"
+      - "fermented_spider_eye"
+  poison:
+    result: "poison_potion"
+    duration: 45
+    cost:
+      - "water_bottle"
+      - "water_bottle"
+      - "water_bottle"
+      - "nether_wart"
+      - "spider_eye"
+  regeneration:
+    result: "regeneration_potion"
+    duration: 45
+    cost:
+      - "water_bottle"
+      - "water_bottle"
+      - "water_bottle"
+      - "nether_wart"
+      - "ghast_tear"
+  strength:
+    result: "strength_potion"
+    duration: 180
+    cost:
+      - "water_bottle"
+      - "water_bottle"
+      - "water_bottle"
+      - "nether_wart"
+      - "blaze_powder"
+  weakness:
+    result: "weakness_potion"
+    duration: 90
+    cost:
+      - "water_bottle"
+      - "water_bottle"
+      - "water_bottle"
+      - "spider_eye"
+#
+#     >  Extended (Redstone)
+#
+extended:
+  night_vision:
+    result: "extended_night_vision_potion"
+    duration: 480
+    cost:
+      - "night_vision_potion"
+      - "night_vision_potion"
+      - "night_vision_potion"
+  invisibility:
+    result: "extended_invisibility_potion"
+    duration: 480
+    cost:
+      - "invisibility_potion"
+      - "invisibility_potion"
+      - "invisibility_potion"
+  leaping:
+    result: "extended_leaping_potion"
+    duration: 480
+    cost:
+      - "leaping_potion"
+      - "leaping_potion"
+      - "leaping_potion"
+  fire_resistance:
+    result: "extended_fire_resistance_potion"
+    duration: 480
+    cost:
+      - "fire_resistance_potion"
+      - "fire_resistance_potion"
+      - "fire_resistance_potion"
+  speed:
+    result: "extended_speed_potion"
+    duration: 480
+    cost:
+      - "speed_potion"
+      - "speed_potion"
+      - "speed_potion"
+  slowness:
+    result: "extended_slowness_potion"
+    duration: 240
+    cost:
+      - "slowness_potion"
+      - "slowness_potion"
+      - "slowness_potion"
+  water_breathing:
+    result: "extended_water_breathing_potion"
+    duration: 480
+    cost:
+      - "water_breathing_potion"
+      - "water_breathing_potion"
+      - "water_breathing_potion"
+  poison:
+    result: "extended_poison_potion"
+    duration: 90
+    cost:
+      - "poison_potion"
+      - "poison_potion"
+      - "poison_potion"
+  regeneration:
+    result: "extended_regeneration_potion"
+    duration: 90
+    cost:
+      - "regeneration_potion"
+      - "regeneration_potion"
+      - "regeneration_potion"
+  strength:
+    result: "extended_strength_potion"
+    duration: 480
+    cost:
+      - "strength_potion"
+      - "strength_potion"
+      - "strength_potion"
+  weakness:
+    result: "extended_weakness_potion"
+    duration: 240
+    cost:
+      - "weakness_potion"
+      - "weakness_potion"
+      - "weakness_potion"
+#
+#     >  Strong (Glowstone)
+#
+strong:
+  leaping:
+    result: "strong_leaping_potion"
+    duration: 90
+    cost:
+      - "leaping_potion"
+      - "leaping_potion"
+      - "leaping_potion"
+  speed:
+    result: "strong_speed_potion"
+    duration: 90
+    cost:
+      - "speed_potion"
+      - "speed_potion"
+      - "speed_potion"
+  health:
+    result: "strong_health_potion"
+    duration: -1
+    cost:
+      - "health_potion"
+      - "health_potion"
+      - "health_potion"
+  harming:
+    result: "strong_harming_potion"
+    duration: -1
+    cost:
+      - "harming_potion"
+      - "harming_potion"
+      - "harming_potion"
+  poison:
+    result: "strong_poison_potion"
+    duration: 21
+    cost:
+      - "poison_potion"
+      - "poison_potion"
+      - "poison_potion"
+  regeneration:
+    result: "strong_regeneration_potion"
+    duration: 22
+    cost:
+      - "regeneration_potion"
+      - "regeneration_potion"
+      - "regeneration_potion"
+  strength:
+    result: "strong_strength_potion"
+    duration: 90
+    cost:
+      - "strength_potion"
+      - "strength_potion"
+      - "strength_potion"

@@ -1,0 +1,108 @@
+#
+#     >  Register
+#
+
+On script unload:
+	clear {teams::*}
+
+On script load:
+	add blue, red, lime, yellow, cyan, pink and orange to {_colors::*}
+	add "&9", "&c", "&a", "&e", "&b", "&d" and "&6" to {_colorscolor::*}
+	add "4", "1", "10", "11", "6", "9" and "14" to {_colorsid::*}
+	add "", "❤", "✚", "✿" and "⚉" to {_symbols::*}
+	add "simple", "heart", "plus", "flower" and "skull" to {_symbolsname::*}
+	add "{}" to {_symbolsnbt::*}
+	add "{BlockEntityTag:{Patterns:[{Color:15,Pattern:""mr""},{Color:CLR,Pattern:""tt""}]}}" to {_symbolsnbt::*}
+	add "{BlockEntityTag:{Patterns:[{Color:15,Pattern:""sc""},{Color:CLR,Pattern:""bo""},{Color:CLR,Pattern:""bs""},{Color:CLR,Pattern:""ts""}]}}" to {_symbolsnbt::*}
+	add "{BlockEntityTag:{Patterns:[{Color:15,Pattern:""flo""}]}}" to {_symbolsnbt::*}
+	add "{BlockEntityTag:{Patterns:[{Color:15,Pattern:""cre""}]}}" to {_symbolsnbt::*}
+	loop {_symbols::*}:
+		add 1 to {_i}
+		loop {_colors::*}:
+			add 1 to {_index}
+			set {_item} to "%{_colors::%{_index}%}% banner item" parsed as item
+			set {_item} to {_item} with all flags hidden
+			set {_nbt} to {_symbolsnbt::%{_i}%}
+			replace all "CLR" in {_nbt} with "%{_colorsid::%{_index}%}%"
+			add {_nbt} to nbt of {_item}
+			if {_symbols::%{_i}%} is "":
+				set {_space} to ""
+			else:
+				set {_space} to " "
+			if {_symbols::%{_i}%} is not "":
+				uhcTeamRegister("%{_symbolsname::%{_i}%}%_%{_colors::%{_index}%}%", {_item}, {_colorscolor::%{_index}%}, "%{_colorscolor::%{_index}%}%%{_symbols::%{_i}%}%")
+			else:
+				uhcTeamRegister("%{_symbolsname::%{_i}%}%_%{_colors::%{_index}%}%", {_item}, {_colorscolor::%{_index}%})
+		clear {_index}
+
+Function uhcTeamRegister(id: string, item: itemtype, color: string, shortname: string=""):
+	clear {_shortname} if ({_shortname} is "")
+	if {teams::list::*} contain {_id}:
+		uhcError("Teams already registered", "Try to register a already existing team", "teamsManager.sk", "uhcTeamRegister", join "ID: " and {_id})
+	add {_id} to {teams::list::*}
+	set {teams::t::%{_id}%::item} to {_item}
+	set {teams::t::%{_id}%::color} to {_color}
+	set {teams::t::%{_id}%::fullname} to {_fullname}
+	{_shortname} is set
+	set {teams::t::%{_id}%::shortname} to {_shortname}
+
+#
+#     >  Party Manager
+#
+
+Function uhcTeamCheck(game: string) :: strings:
+	set {_teamsCount} to round up {host::%{_game}%::slots}/{host::%{_game}%::team}
+	add {host::%{_game}%::teams::*} to {_gameTeams::*}
+	while {_teamsCount} is not {_index}:
+		add 1 to {_index}
+		add element {_index} of {teams::list::*} to {_neededTeams::*}
+	loop {_gameTeams::*}:
+		if {_neededTeams::*} doesn't contain loop-value:
+			add loop-value to {_diff::*}
+	loop {_neededTeams::*}:
+		if {_gameTeams::*} doesn't contain loop-value:
+			add loop-value to {_diff::*}
+	set {host::%{_game}%::teams::*} to {_neededTeams::*}
+	return {_diff::*}
+
+Function uhcTeamJoin(p: player, team: string):
+	set {_game} to {host-player::%{_p}%}
+	set {_playerTeam} to {host-player::%{_p}%::team}
+	if size of {host::%{_game}%::game::team::%{_team}%::*} >= {host::%{_game}%::team}:
+		send string("uhc.error.team_full", {_p}) to {_p}
+		stop
+	if {_playerTeam} is set:
+		uhcTeamLeave({_p})
+	add {_p} to {host::%{_game}%::game::team::%{_team}%::*}
+	set {host-player::%{_p}%::team} to {_team}
+	loop {host::%{_game}%::p::*}:
+		uhcTeamsUpdate(loop-value, {inv::%loop-value%::page::index})
+	uhcTab()
+	if {host::%{_game}%::state} is "waiting" or "starting":
+		uhcWaitingInventory({_p})
+
+Function uhcTeamLeave(p: player):
+	set {_game} to {host-player::%{_p}%}
+	set {_team} to {host-player::%{_p}%::team}
+	clear {host-player::%{_p}%::team}
+	remove {_p} from {host::%{_game}%::game::team::%{_team}%::*}
+	loop {host::%{_game}%::p::*}:
+		uhcTeamsUpdate(loop-value, {inv::%loop-value%::page::index})
+	uhcTab()
+	{host::%{_game}%::state} is "waiting" or "starting"
+	uhcWaitingInventory({_p})
+
+#
+#     >  Get
+#
+
+Function uhcGetFormattedPlayer(p: player) :: string:
+	set {_game} to {host-player::%{_p}%}
+	set {_team} to {host-player::%{_p}%::team}
+	if {teams::t::%{_team}%::shortname} is set:
+		return colored join {teams::t::%{_team}%::shortname}, " " and "%{_p}%"
+	else:
+		return colored join {teams::t::%{_team}%::color} and "%{_p}%"
+
+Function uhcGetFormattedTeam(team: string, p: player) :: string:
+	return string("uhc.teams.%{_team}%", {_p})

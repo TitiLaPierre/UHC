@@ -1,0 +1,18 @@
+Function uhcGame(game: text):
+	uhcCheckWin({_game})
+	set {host::%{_game}%::timer} to 0
+	loop {host::%{_game}%::p::*}:
+		uhcScoreGameOpen(loop-value)
+	while {host::%{_game}%::state} is "ingame":
+		if {host::%{_game}%::timer} is between 0 and 30:
+			uhcPartyInvincibility({_game})
+		if {host::%{_game}%::timer} is {host::%{_game}%::game::pvp}:
+			uhcPartyPvp({_game})
+		if {host::%{_game}%::timer} is {host::%{_game}%::game::bTime}:
+			uhcPartyBorder({_game})
+		if {host::%{_game}%::timer} is between 16200 and 18000:
+			uhcPartyEndGame({_game})
+		add 1 to {host::%{_game}%::timer}
+		loop {host::%{_game}%::p::*} and {host::%{_game}%::spec::*}:
+			uhcScoreGameUpdate(loop-value)
+		wait a second

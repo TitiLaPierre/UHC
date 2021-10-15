@@ -1,0 +1,58 @@
+On inventory click:
+	"%event-world%" contain "UHCHOST-"
+	event-inventory is player's inventory
+	set {_w} to "%event-world%"
+	{host::%{_w}%::state} is "waiting" or "starting"
+	if {host-task::%player%} is not "inv_%{_w}%":
+		cancel event
+		uhcInvAction(player, event-item)
+
+On bucket empty:
+	"%event-world%" contain "UHCHOST-"
+	set {_w} to "%event-world%"
+	{host::%{_w}%::state} is "waiting" or "starting"
+	cancel event
+
+On click:
+	"%event-world%" contain "UHCHOST-"
+	set {_w} to "%event-world%"
+	{host::%{_w}%::state} is "waiting" or "starting"
+	uhcInvAction((player), (player's tool))
+	cancel event
+
+On drop:
+	"%event-world%" contain "UHCHOST-"
+	set {_w} to "%event-world%"
+	{host::%{_w}%::state} is "waiting" or "starting"
+	cancel event
+
+On damage of player:
+	"%event-world%" contain "UHCHOST-"
+	set {_w} to "%event-world%"
+	{host::%{_w}%::state} is "waiting" or "starting":
+		cancel event
+	{host::%{_w}%::nodamage} is true:
+		cancel event
+
+On hunger meter change:
+	"%event-world%" contain "UHCHOST-"
+	set {_w} to "%event-world%"
+	{host::%{_w}%::state} is "waiting" or "starting"
+	cancel event
+
+on form:
+	"%event-world%" contain "UHCHOST-"
+	set {_w} to "%event-world%"
+	{host::%{_w}%::state} is "waiting" or "starting"
+	cancel event
+
+Function uhcInvAction(p: player, item: item):
+	if type of {_item} is downward command block:
+		name of {_item} is string("uhc.lobby.items.edit_game", {_p})
+		uhcHostOpen({_p})
+	else if type of {_item} is any banner item:
+		name of {_item} is string("uhc.lobby.items.change_team", {_p})
+		uhcTeamsOpen({_p})
+	else if type of {_item} is red dye:
+		name of {_item} is string("uhc.lobby.items.leave_game", {_p})
+		uhcLeave({_p})

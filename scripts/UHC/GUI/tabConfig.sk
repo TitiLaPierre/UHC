@@ -1,0 +1,224 @@
+Options:
+	sound-error: entity.villager.no
+	sound-success: block.note.pling
+	sound-click: ui.button.click
+
+Function uhcHostTabConfig(p: player):
+	set {_game} to {host-player::%{_p}%}
+	
+	#
+	#     >  Settings up
+	#
+	
+	loop 5 times:
+		add 1 to {_index}
+		add element {_index} of {host-player::%{_p}%::config::*} to {_return::*}
+	while size of {_return::*} < 5:
+		add false to {_return::*}
+	
+	#
+	#     >  New
+	#
+	
+	set {_new} to lime stained glass pane named string("uhc.gui.config.new.name", {_p})
+	set lore of {_new} to colored strings("uhc.gui.config.new.lore", {_p})
+	
+	#
+	#     >  GUI Loop
+	#
+	
+	set {_slot} to 20
+	loop {_return::*}:
+		if loop-value is false:
+			set slot {_slot} of open inventory of {_p} to {_new}
+			set {inv::%{_p}%::slot::%{_slot}%} to false
+		else:
+			set {_itemId} to {host-player::%{_p}%::c::%loop-value%::config::icon}
+			set {_item} to {host-config::items::%{_itemId}%}
+			set {_item} to {_item} with all flags hidden
+			set name of {_item} to string("uhc.gui.config.configFormat.name", {_p}, "name;%{host-player::%{_p}%::c::%loop-value%::config::name}%")
+			set lore of {_item} to strings("uhc.gui.config.configFormat.lore", {_p})
+			set slot {_slot} of open inventory of {_p} to {_item}
+			set {inv::%{_p}%::slot::%{_slot}%} to loop-value
+		add 1 to {_slot}
+
+	set {cooldown::%{_p}%} to true
+	wait 0.1 second
+	clear {cooldown::%{_p}%}
+
+On inventory click:
+	event-inventory is not player's inventory
+	set {_game} to {host-player::%player%}
+	{inv::%player%} is "setup_config_%{_game}%"
+	event-clicktype is not left mouse button with shift or right mouse button with shift
+	{cooldown::%player%} is not set
+	set {cooldown::%player%} to true
+	set {_id} to {inv::%player%::slot::%index of event-slot%}
+	if {_id} is set:
+		if {_id} is false:
+			uhcHostUpdate(player, "editConfig")
+		else:
+			if event-clicktype is left mouse button or right mouse button:
+				uhcImportConfig(player, {_id})
+				close player's inventory
+				play sound "entity.player.levelup" with volume 1 and pitch 2 at player for player
+			else if event-clicktype is middle mouse button:
+				clear {host-player::%player%::c::%{_id}%::*}
+				remove {_id} from {host-player::%player%::config::*}
+				uhcHostUpdate(player, "config")
+	wait 0.1 second
+	clear {cooldown::%player%}
+
+Function uhcHostTabEditConfig(p: player):
+	set {inv::%{_p}%::back} to "config"
+	set {_iconId} to {inv-data::%{_p}%::icon}
+	set {_configName} to {inv-data::%{_p}%::name}
+
+	#
+	#     >  Icon
+	#
+
+	if {_iconId} is set:
+		set {_iconName} to string("items.%{_iconId}%", {_p})
+		set {_icon} to {host-config::items::%{_iconId}%}
+		set {_icon} to {_icon} with all flags hidden
+	else:
+		set {_iconName} to string("uhc.gui.config.undefined", {_p})
+		set {_icon} to stone button
+	set name of {_icon} to string("uhc.gui.config.select_icon.name", {_p})
+	set lore of {_icon} to colored strings("uhc.gui.config.select_icon.lore", {_p}, "icon;%{_iconName}%")
+
+	#
+	#     >  Name
+	#
+
+	if {_configName} is not set:
+		set {_configName} to string("uhc.gui.config.undefined", {_p})
+	set {_name} to name tag named string("uhc.gui.config.set_name.name", {_p})
+	set lore of {_name} to colored strings("uhc.gui.config.set_name.lore", {_p}, "name;%{_configName}%")
+
+	#
+	#     >  Confirm
+	#
+
+	if {inv-data::%{_p}%::name} is not set:
+		set {_check} to false
+	if {inv-data::%{_p}%::icon} is not set:
+		set {_check} to false
+
+	if {_check} is false:
+		set {_confirm} to red stained glass pane named string("uhc.gui.config.create_config_disabled.name", {_p})
+	else:
+		set {_confirm} to lime stained glass pane named  string("uhc.gui.config.create_config_enabled.name", {_p})
+		set lore of {_confirm} to colored strings("uhc.gui.config.create_config_enabled.lore", {_p})
+
+	#
+	#     >  GUI
+	#
+
+	set slot 21 of open inventory of {_p} to {_icon}
+	set slot 23 of open inventory of {_p} to {_name}
+
+	set slot 30, 31 and 32 of open inventory of {_p} to {_confirm}
+
+	set {cooldown::%{_p}%} to true
+	wait 0.1 second
+	clear {cooldown::%{_p}%}
+
+On inventory click:
+	event-inventory is not player's inventory
+	set {_game} to {host-player::%player%}
+	{inv::%player%} is "setup_editConfig_%{_game}%"
+	event-clicktype is not left mouse button with shift or right mouse button with shift
+	{cooldown::%player%} is not set
+	set {cooldown::%player%} to true
+	if index of event-slot is 21:
+		uhcHostUpdate(player, "selectIcon")
+	else if index of event-slot is 23:
+		set {inv::%player%::bypass} to true
+		set {_text} to (string("uhc.gui.config.enter_name", player)) if ({inv-data::%player%::name} is not set) else ({inv-data::%player%::name})
+		open an anvil gui named "uhcHost_configName" to player with default text {_text}
+	else if index of event-slot is 30, 31 or 32:
+		{inv-data::%player%::name} and {inv-data::%player%::icon} are set
+		set {_uuid} to UUID()
+		uhcExportConfig(player, {_uuid})
+		uhcHostUpdate(player, "config")
+	wait 0.1 second
+	clear {cooldown::%player%}
+
+On close anvil gui named "uhcHost_configName":
+	if size of event-string split at "" < 3:
+		play sound "{@sound-error}" at player for player
+		send string("uhc.error.name_too_short", player)
+	else if size of event-string split at "" > 25:
+		play sound "{@sound-error}" at player for player
+		send string("uhc.error.name_too_long", player)
+	else:
+		set {inv-data::%player%::name} to uncolored event-string
+	wait a tick
+	uhcHostOpen(player, "editConfig")
+
+Function uhcHostTabSelectIcon(p: player, arg: string="0"):
+	set {inv::%{_p}%::back} to "editConfig"
+	set {_game} to {host-player::%{_p}%}
+
+	add all integers between 20 and 24 to {_slots::*}
+	add all integers between 29 and 33 to {_slots::*}
+
+	clear slots {_slots::*} of open inventory of {_p}
+
+	set {_page} to {_arg} parsed as integer
+
+	set {_index} to 1
+	set {_index} to 10*{_page}
+	set {_calcBack} to {_index}-1
+	if element {_calcBack} of {host-config::icons::*} is set:
+		{_calcBack} > 0
+		set {inv::%{_p}%::page::back} to true
+		set slot 37 of open inventory of {_p} to an arrow named string("uhc.gui.back.page_previous", {_p})
+	loop 10 times:
+		add 1 to {_index}
+		add element {_index} of {host-config::icons::*} to {_return::*}
+	set {_calcNext} to {_index}+1
+	set {inv::%{_p}%::page::index} to {_page}
+	if element {_calcNext} of {host-config::icons::*} is set:
+		set {inv::%{_p}%::page::next} to true
+		set slot 43 of open inventory of {_p} to an arrow named string("uhc.gui.back.page_next", {_p})
+	set {_index} to 1
+	loop {_return::*}:
+		set {_item} to {host-config::items::%loop-value%} named string("uhc.gui.click_type.click_select", {_p})
+		set {_item} to {_item} with all flags hidden
+		set {_slot} to {_slots::%{_index}%}
+		set slot {_slot} of open inventory of {_p} to {_item}
+		set {inv::%{_p}%::slot::%{_slot}%} to loop-value
+		add 1 to {_index}
+
+	set {cooldown::%{_p}%} to true
+	wait 0.1 second
+	clear {cooldown::%{_p}%}
+
+On inventory click:
+	event-inventory is not player's inventory
+	set {_game} to {host-player::%player%}
+	{inv::%player%} start with "setup_selectIcon_%{_game}%"
+	event-clicktype is not left mouse button with shift or right mouse button with shift
+	{cooldown::%player%} is not set
+	set {cooldown::%player%} to true
+	if index of event-slot is 37:
+		{inv::%player%::page::back} is true
+		set {_} to {inv::%player%::page::index}-1
+		uhcHostUpdate(player, "selectIcon", "%{_}%")
+		play sound "{@sound-click}" with volume 0.8 and pitch 1 at player for player
+	else if index of event-slot is 43:
+		{inv::%player%::page::next} is true
+		set {_} to {inv::%player%::page::index}+1
+		uhcHostUpdate(player, "selectIcon", "%{_}%")
+		play sound "{@sound-click}" with volume 0.8 and pitch 1 at player for player
+	else:
+		set {_id} to {inv::%player%::slot::%index of event-slot%}
+		{_id} is set
+		set {inv-data::%player%::icon} to {_id}
+		uhcHostUpdate(player, "editConfig")
+
+	wait 0.1 second
+	clear {cooldown::%player%}

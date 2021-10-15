@@ -1,0 +1,115 @@
+Options:
+	sound-error: entity.villager.no
+	sound-success: block.note.pling
+	sound-click: ui.button.click
+
+On load:
+	uhcScenariosRegister("deadlyApple", golden apple, true)
+
+on uhc scenario disable:
+	set {_id} to "deadlyApple"
+	event-string is {_id}
+	set {_game} to {host-player::%player%}
+	clear {host::%{_game}%::sConfig::%{_id}%::*}
+
+on uhc scenario enable:
+	set {_id} to "deadlyApple"
+	event-string is {_id}
+	set {_game} to {host-player::%player%}
+	set {host::%{_game}%::sConfig::%{_id}%::apple} to 1
+
+On uhc scenario config:
+	set {_id} to "deadlyApple"
+	event-string is {_id}
+	set {_game} to {host-player::%player%}
+	set {_apple} to {host::%{_game}%::sConfig::%{_id}%::apple}
+
+	#
+	#     >  Remove
+	#
+
+	if {_apple} - 3 >= 1:
+		set {_removeThree} to orange stained glass pane named string("scenarios.deadlyApple.gui.remove3", player)
+	if {_apple} - 1 >= 1:
+		set {_removeOne} to yellow stained glass pane named string("scenarios.deadlyApple.gui.remove1", player)
+
+	#
+	#     >  Deadly Apple
+	#
+
+	set {_scenarioName} to string("scenarios.%{_id}%.name", player)
+	set {_lore} to join strings("scenarios.%{_id}%.lore", player) by nl
+	set {_item} to {scenarios::s::%{_id}%::item} with no nbt named string("uhc.gui.scenarios.scenarioFormat.name", player, "name;%{_scenarioName}%")
+	set lore of {_item} to colored strings("uhc.gui.scenarios.scenarioFormat.lore", player, "lore;%{_lore}%")
+	clear last element of lore of {_item}
+	clear last element of lore of {_item}
+	add string("scenarios.%{_id}%.gui.apple", player, "apple;%{_apple}%") to lore of {_item}
+	if {_apple} is not 1:
+		add "" to lore of {_item}
+		add colored string("uhc.gui.click_type.drop_reset", player) to lore of {_item}
+
+	#
+	#     >  Add
+	#
+
+	if {_apple} + 1 <= 7:
+		set {_addOne} to lime stained glass pane named string("scenarios.deadlyApple.gui.add1", player)
+	if {_apple} + 3 <= 7:
+		set {_addThree} to green stained glass pane named string("scenarios.deadlyApple.gui.add3", player)
+
+	#
+	#     >  GUI
+	#
+
+	set slot 20 of open inventory of player to {_removeThree}
+	set slot 21 of open inventory of player to {_removeOne}
+
+	set slot 22 of open inventory of player to {_item}
+
+	set slot 23 of open inventory of player to {_addOne}
+	set slot 24 of open inventory of player to {_addThree}
+
+On inventory click:
+	set {_id} to "deadlyApple"
+	event-inventory is not player's inventory
+	set {_game} to {host-player::%player%}
+	{inv::%player%} is "setup_sConfig_%{_game}%_%{_id}%"
+	if event-slot is 20:
+		{host::%{_game}%::sConfig::%{_id}%::apple} - 3 >= 1
+		remove 3 from {host::%{_game}%::sConfig::%{_id}%::apple}
+		uhcHostUpdate(player, "sConfig", {_id})
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 21:
+		{host::%{_game}%::sConfig::%{_id}%::apple} - 1 >= 1
+		remove 1 from {host::%{_game}%::sConfig::%{_id}%::apple}
+		uhcHostUpdate(player, "sConfig", {_id})
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 22:
+		{host::%{_game}%::sConfig::%{_id}%::apple} is not 1
+		event-clicktype is drop key
+		set {host::%{_game}%::sConfig::%{_id}%::apple} to 1
+		uhcHostUpdate(player, "sConfig", {_id})
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 23:
+		{host::%{_game}%::sConfig::%{_id}%::apple} + 1 <= 7
+		add 1 to {host::%{_game}%::sConfig::%{_id}%::apple}
+		uhcHostUpdate(player, "sConfig", {_id})
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 24:
+		{host::%{_game}%::sConfig::%{_id}%::apple} + 3 <= 7
+		add 3 to {host::%{_game}%::sConfig::%{_id}%::apple}
+		uhcHostUpdate(player, "sConfig", {_id})
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+
+#
+#     >  Game
+#
+
+On death of player:
+	"%event-world%" contain "UHCHOST-"
+	set {_game} to "%event-world%"
+	set {_id} to "deadlyApple"
+	#
+	attacker is a player
+	{host::%{_game}%::sConfig::%{_id}%::apple} is set
+	drop {host::%{_game}%::sConfig::%{_id}%::apple} of golden apple at victim

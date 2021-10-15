@@ -1,0 +1,33 @@
+Function uhcScoreWaitingOpen(p: player):
+	{_p} is set
+	wipe {_p}'s sidebar
+	set {_game} to {host-player::%{_p}%}
+	set name of sidebar of {_p} to {host::%{_game}%::name}
+	set {_state} to string("uhc.scoreboard.waiting_players", {_p})
+	set {_scoreboard::*} to strings("uhc.scoreboard.lobby", {_p}, ("state;%{_state}%", "host;%{host::%{_game}%::host}%", "players;%size of {host::%{_game}%::p::*}%", "slots;%{host::%{_game}%::slots}%"))
+	loop reversed {_scoreboard::*}:
+		add 1 to {_index}
+		if {_index} is 3:
+			set id based score colored "%loop-value%" in sidebar of {_p} to {_index} with id "%{_p}%.%{_game}%.players"
+		else if {_index} is 8:
+			set id based score colored "%loop-value%" in sidebar of {_p} to {_index} with id "%{_p}%.%{_game}%.state"
+		else:
+			set score colored "%loop-value%" in sidebar of {_p} to {_index}
+	uhcScoreWaitingUpdate({_p})
+
+Function uhcScoreWaitingUpdate(p: player):
+	{_p} is set
+	set {_game} to {host-player::%{_p}%}
+	set name of sidebar of {_p} to {host::%{_game}%::name}
+	if {host::%{_game}%::state} is "starting":
+		update score with id "%{_p}%.%{_game}%.state" to string("uhc.scoreboard.starting_game", {_p}) and 8
+	else:
+		update score with id "%{_p}%.%{_game}%.state" to string("uhc.scoreboard.waiting_players", {_p}) and 8
+	set {_scoreboard::*} to reversed strings("uhc.scoreboard.lobby", {_p}, ("players;%size of {host::%{_game}%::p::*}%", "slots;%{host::%{_game}%::slots}%"))
+	update score with id "%{_p}%.%{_game}%.players" to colored "%{_scoreboard::3}%" and 3
+
+On uhc lang change:
+	set {_game} to {host-player::%player%}
+	{_game} is set
+	{host::%{_game}%::state} is "waiting" or "starting"
+	uhcScoreWaitingOpen(player)

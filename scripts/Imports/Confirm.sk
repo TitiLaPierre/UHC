@@ -1,0 +1,26 @@
+Function confirm(p: player, item: item):
+	set {inv::%{_p}%} to "confirm"
+	open chest inventory with 3 rows named string("confirm.title", {_p}) to {_p}
+	set slot integers between 0 and 8 of open inventory of {_p} to gray stained glass pane named "&r"
+	set slot integers between 18 and 26 of open inventory of {_p} to gray stained glass pane named "&r"
+	set slot 9 and 17 of open inventory of {_p} to gray stained glass pane named "&r"
+	#
+	set slot integers between 10 and 12 of open inventory of {_p} to slime ball named string("confirm.accept", {_p})
+	set slot integers between 14 and 16 of open inventory of {_p} to redstone named  string("confirm.deny", {_p})
+	#
+	set slot 13 of open inventory of {_p} to {_item}
+	clear {inv::%{_p}%::bypass}
+
+On inventory click:
+	{inv::%player%} is "confirm"
+	event-inventory is not player's inventory
+	cancel event
+	if integers between 10 and 12 contain event-slot:
+		make player execute command "/host delete"
+		close player's inventory
+		clear {inv::%player%::command}
+		clear {inv::%player%::cancel}
+	else if integers between 14 and 16 contain event-slot:
+		set {inv::%player%::bypass} to true
+		close player's inventory
+		uhcHostOpen(player, {inv::%player%::tab}, {inv::%player%::args})

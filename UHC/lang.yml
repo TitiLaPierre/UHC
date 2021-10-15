@@ -1,0 +1,27 @@
+lang:
+  french:
+    name: "Français"
+    nbt: '{SkullOwner:{Id:"395a599f-9588-4fe2-ada9-07cd81262996",Properties:{textures:[{Value:"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTEyNjlhMDY3ZWUzN2U2MzYzNWNhMWU3MjNiNjc2ZjEzOWRjMmRiZGRmZjk2YmJmZWY5OWQ4YjM1Yzk5NmJjIn19fQ=="}]}}}'
+    attach:
+      - "fr_fr"
+      - "fr_ca"
+  english:
+    name: "English"
+    nbt: '{SkullOwner:{Id:"3c30484a-76d3-4cfe-88e5-e7599bc9ac4d",Properties:{textures:[{Value:"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNGNhYzk3NzRkYTEyMTcyNDg1MzJjZTE0N2Y3ODMxZjY3YTEyZmRjY2ExY2YwY2I0YjM4NDhkZTZiYzk0YjQifX19"}]}}}'
+    attach:
+      - "en_au"
+      - "en_ca"
+      - "en_uk"
+      - "en_nz"
+      - "en_us"
+  spanish:
+    name: "Español"
+    nbt: '{SkullOwner:{Id:"884a57c8-27ad-4b50-b42b-bee01239f4a8",Properties:{textures:[{Value:"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzJiZDQ1MjE5ODMzMDllMGFkNzZjMWVlMjk4NzQyODc5NTdlYzNkOTZmOGQ4ODkzMjRkYThjODg3ZTQ4NWVhOCJ9fX0="}]}}}'
+    attach:
+      - "es_ar"
+      - "es_cl"
+      - "es_es"
+      - "es_mx"
+      - "es_uy"
+      - "es_ve"
+default: "french"

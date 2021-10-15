@@ -1,0 +1,48 @@
+Options:
+	sound-error: entity.villager.no
+	sound-success: block.note.pling
+	sound-click: ui.button.click
+
+Function uhcHostTabInventory(p: player):
+	set {_game} to {host-player::%{_p}%}
+
+	#
+	#     >  Edit inventory
+	#
+
+	set {_edit} to wooden axe with no nbt named string("uhc.gui.inventory.edit.name", {_p})
+	set lore of {_edit} to colored strings("uhc.gui.inventory.edit.lore", {_p})
+
+	#
+	#     >  See inventory
+	#
+
+	set {_see} to ender pearl named string("uhc.gui.inventory.see.name", {_p})
+	set lore of {_see} to colored strings("uhc.gui.inventory.see.lore", {_p})
+
+	#
+	#     >  GUI
+	#
+
+	set slot 21 of open inventory of {_p} to {_edit}
+	set slot 23 of open inventory of {_p} to {_see}
+
+	set {cooldown::%{_p}%} to true
+	wait 0.1 second
+	clear {cooldown::%{_p}%}
+
+On inventory click:
+	event-inventory is not player's inventory
+	set {_game} to {host-player::%player%}
+	{inv::%player%} is "setup_inventory_%{_game}%"
+	event-clicktype is not left mouse button with shift or right mouse button with shift
+	{cooldown::%player%} is not set
+	set {cooldown::%player%} to true
+	if index of event-slot is 21:
+		close player's inventory
+		uhcManageInventory(player)
+	else if index of event-slot is 23:
+		close player's inventory
+		make player execute command "/inv -back"
+	wait 0.1 second
+	clear {cooldown::%player%}

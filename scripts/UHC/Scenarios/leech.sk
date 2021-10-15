@@ -1,0 +1,115 @@
+Options:
+	sound-error: entity.villager.no
+	sound-success: block.note.pling
+	sound-click: ui.button.click
+
+On load:
+	uhcScenariosRegister("leech", redstone, true)
+
+on uhc scenario disable:
+	set {_id} to "leech"
+	event-string is {_id}
+	set {_game} to {host-player::%player%}
+	clear {host::%{_game}%::sConfig::%{_id}%::*}
+
+on uhc scenario enable:
+	set {_id} to "leech"
+	event-string is {_id}
+	set {_game} to {host-player::%player%}
+	set {host::%{_game}%::sConfig::%{_id}%::life} to 3
+
+On uhc scenario config:
+	set {_id} to "leech"
+	event-string is {_id}
+	set {_game} to {host-player::%player%}
+	set {_life} to {host::%{_game}%::sConfig::%{_id}%::life}
+
+	#
+	#     >  Remove
+	#
+
+	if {_life} - 1 >= 0.5:
+		set {_removeOne} to orange stained glass pane named string("scenarios.leech.gui.remove1", player)
+	if {_life} - 0.5 >= 0.5:
+		set {_removeHalf} to yellow stained glass pane named string("scenarios.leech.gui.removeHalf", player)
+
+	#
+	#     >  Leech
+	#
+
+	set {_scenarioName} to string("scenarios.%{_id}%.name", player)
+	set {_lore} to join strings("scenarios.%{_id}%.lore", player) by nl
+	set {_item} to {scenarios::s::%{_id}%::item} with no nbt named string("uhc.gui.scenarios.scenarioFormat.name", player, "name;%{_scenarioName}%")
+	set lore of {_item} to colored strings("uhc.gui.scenarios.scenarioFormat.lore", player, "lore;%{_lore}%")
+	clear last element of lore of {_item}
+	clear last element of lore of {_item}
+	add string("scenarios.%{_id}%.gui.life", player, "life;%{_life}%") to lore of {_item}
+	if {_life} is not 3:
+		add "" to lore of {_item}
+		add colored string("uhc.gui.click_type.drop_reset", player) to lore of {_item}
+
+	#
+	#     >  Add
+	#
+
+	if {_life} + 0.5 <= 10:
+		set {_addHalf} to lime stained glass pane named string("scenarios.leech.gui.addHalf", player)
+	if {_life} + 1 <= 10:
+		set {_addOne} to green stained glass pane named string("scenarios.leech.gui.add1", player)
+
+	#
+	#     >  GUI
+	#
+
+	set slot 20 of open inventory of player to {_removeOne}
+	set slot 21 of open inventory of player to {_removeHalf}
+
+	set slot 22 of open inventory of player to {_item}
+
+	set slot 23 of open inventory of player to {_addHalf}
+	set slot 24 of open inventory of player to {_addOne}
+
+On inventory click:
+	set {_id} to "leech"
+	event-inventory is not player's inventory
+	set {_game} to {host-player::%player%}
+	{inv::%player%} is "setup_sConfig_%{_game}%_%{_id}%"
+	if event-slot is 20:
+		{host::%{_game}%::sConfig::%{_id}%::life} - 1 >= 0.5
+		remove 1 from {host::%{_game}%::sConfig::%{_id}%::life}
+		uhcHostUpdate(player, "sConfig", {_id})
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 21:
+		{host::%{_game}%::sConfig::%{_id}%::life} - 0.5 >= 0.5
+		remove 0.5 from {host::%{_game}%::sConfig::%{_id}%::life}
+		uhcHostUpdate(player, "sConfig", {_id})
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 22:
+		{host::%{_game}%::sConfig::%{_id}%::life} is not 3
+		event-clicktype is drop key
+		set {host::%{_game}%::sConfig::%{_id}%::life} to 3
+		uhcHostUpdate(player, "sConfig", {_id})
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 23:
+		{host::%{_game}%::sConfig::%{_id}%::life} + 0.5 <= 10
+		add 0.5 to {host::%{_game}%::sConfig::%{_id}%::life}
+		uhcHostUpdate(player, "sConfig", {_id})
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 24:
+		{host::%{_game}%::sConfig::%{_id}%::life} + 1 <= 10
+		add 1 to {host::%{_game}%::sConfig::%{_id}%::life}
+		uhcHostUpdate(player, "sConfig", {_id})
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+
+#
+#     >  Game
+#
+
+On death of player:
+	"%event-world%" contain "UHCHOST-"
+	set {_game} to "%event-world%"
+	set {_id} to "leech"
+	#
+	attacker is a player
+	{host::%{_game}%::sConfig::%{_id}%::life} is set
+	heal attacker by {host::%{_game}%::sConfig::%{_id}%::life}

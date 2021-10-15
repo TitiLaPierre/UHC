@@ -1,0 +1,993 @@
+lang:
+  prefix: "&e&lLANGUE &7▎&f"
+  error: "&c✘&f"
+  defined: "{lang.prefix} Votre langue a été définie en &e%lang%&f."
+  defined_default: "{lang.prefix} Votre langue a été définie en &e%lang%&f par défaut."
+  unsupported_lang: "{lang.error} Votre langue n'est pas supportée !"
+  uncorrect_syntax: "{lang.error} Syntaxe: &c/&flang &c<&fenglish&c/&ffrench&c/&fspanish&c>&f."
+#timespan:
+#  second: "s"
+#  minute: "min"
+#  hour: "h"
+#  day: "j"
+confirm:
+  title: "Veuillez confirmer"
+  accept: "&aConfirmer"
+  deny: "&cAnnuler"
+  delete_game: "&eVoulez-vous réellement supprimer %game% ?"
+uhc:
+  name: "&9[UHC Classique]"
+  prefix: "&e&lUHC &7▎&f"
+  spectate_prefix: "&7&lSPEC &7▎&f"
+  host_say: "&e&lHÔTE &e%player% &f&l» &e%message%"
+  lobby:
+    items:
+      edit_game: "&f&l» &eGérer la partie &7(Clic Droit)&r"
+      change_team: "&f&l» &6Équipes &7(Clic Droit)&r"
+      leave_game: "&f&l» &cQuitter la partie &7(Clic Droit)&r"
+  game_management:
+    create_start: "{uhc.prefix} Création de la partie '&e%game%&f'"
+    create_state: "{uhc.prefix} Création de la partie (&e%state%&f/&e5&f)"
+    create_end: "{uhc.prefix} Création de la partie terminé!"
+    #
+    game_deleted: "{uhc.prefix} Votre partie '&e%game%&f' a été supprimée."
+    #
+    join_game: "&a+ &f%player% à &arejoint &fla partie (&a%players%&f/&a%slots%&f)"
+    join_game_as_spec: "&a+ &fVous avez &arejoint&f la partie en tant que &aspectateur&f."
+    leave_game: "&c- &f%player% à &cquitté &fla partie (&c%players%&f/&c%slots%&f)"
+    #
+    starting_canceled: "{uhc.prefix} Le lancement de la partie a été &cannulé&f par l'hôte."
+    starting_in: "{uhc.prefix} Lancement de la partie dans &e%time% seconde(s)&f."
+    teleport: "&fTéléporation: %progress%"
+    #
+    chat_format: "%player%&f: %message%"
+    chat_format_spec: "{uhc.spectate_prefix} %player%&f: %message%"
+    #
+    start:
+      - ""
+      - "&e&l  {uhc.prefix} Créé par &eTitiLaPierre"
+      - ""
+      - "&b&l    VOTRE ÉQUIPE"
+      - "&f&l      &fÉquipe: %team%"
+      - "&f&l      &fJoueurs:"
+    victory:
+      - ""
+      - "&e&l  {uhc.prefix} Fin de partie"
+      - ""
+      - "&f&l    &fVictoire de l'équipe %team%&f!"
+      - ""
+      - "&f&l    &fLa partie est &aterminée&f, &ebien"
+      - "&f&l    &ejoué&f à tous!"
+      - ""
+    none:
+      - ""
+      - "&e&l  {uhc.prefix} Fin de partie"
+      - ""
+      - "&f&l    &fAucune équipe ne remporte"
+      - "&f&l    &fla partie."
+      - ""
+      - "&f&l    &fLa partie est &aterminée&f, &ebien"
+      - "&f&l    &ejoué&f à tous!"
+      - ""
+    spectate:
+      - ""
+      - "&e&l  {uhc.prefix} Spectateur"
+      - ""
+      - "&f&l    &fVous êtes &cmort&f, la partie"
+      - "&f&l    &fest &eterminée&f pour vous."
+      - ""
+      - "&f&l    &fVous pouvez regarder la &efin&f de la"
+      - "&f&l    &epartie&f ou retourner au lobby."
+      - ""
+    dead: "{uhc.prefix} Vous êtes &cmort&f!"
+    dead_by_player: "{uhc.prefix} %victim%&f a été tué %attacker%&f."
+    other_death: "{uhc.prefix} %victim%&f est mort&f."
+    team_eliminated: "{uhc.prefix} L'équipe %team%&f est éliminé."
+    to_lobby: "&7Retourner au {uhc.game_management.to_lobby_lore}&e➲ lobby &7(Clic Gauche)"
+    to_lobby_lore: "<tooltip:&7Cliquez pour retourner au lobby.><command:/hub>"
+    join_lobby: "&7Vous allez rejoindre un lobby dans 25 secondes..."
+    back_to_lobby: "{uhc.prefix} Vous avez été envoyé sur un &elobby&f."
+    #
+    state_waiting: "En attente..."
+    state_ingame: "En jeu!"
+    state_end: "Terminé"
+    #
+    invincibility: "&cInvincibilité: %time%"
+    invincibility_disabled: "&cInvincibilité: Désactivé!"
+  warnings:
+    damage_enabled: "&eAttention: &fLes &cdégâts&f sont maintenant &aactivés&f."
+    pvp_enabled: "&eAttention: &fLe &ccombat&f est maintenant &aactivé&f."
+    border_enabled: "&eAttention: &fLa &cbordure&f commence à &arétrécir&f."
+    end_game: "&eAttention: &fLa partie&f va se &aterminer&f dans &c%time%&f."
+    kicked_from_team: "&eAttention: &fVous avez été &céjecté&f de votre équipe."
+    kick_reason_slots: "&8Modification des places disponibles."
+    kick_reason_teams: "&8Modification de la taille des équipes."
+  error:
+    already_creating: "{lang.error} Vous créer déjà une partie."
+    already_playing: "{lang.error} Vous êtes déjà dans une partie."
+    game_does_not_exist: "{lang.error} Cette partie n'existe pas."
+    already_started: "{lang.error} Cette partie à déjà commencé."
+    game_full: "{lang.error} Cette partie est complète."
+    game_private: "{lang.error} Cette partie est privé."
+    not_playing: "{lang.error} Vous n'êtes dans aucune partie."
+    require_more_players: "{lang.error} Il n'y a pas assez de joueurs pour lancer la partie."
+    team_full: "{lang.error} Cette équipe est complète."
+    game_unaccessible_as_spec: "{lang.error} Vous ne pouvez pas rejoindre cette partie en tant que spectateur."
+    game_not_started: "{lang.error} Cette partie est déjà terminée."
+    game_end: "{lang.error} Cette partie est déjà terminée."
+    name_too_short: "{lang.error} Ce nom est trop court."
+    name_too_long: "{lang.error} Ce nom est trop long."
+    not_host: "{lang.error} Vous n'êtes pas l'hôte de la partie."
+    cannot_do_that: "{lang.error} Vous ne pouvez pas faire ça actuellement."
+    syntax: "{lang.error} Syntaxe: %syntax%"
+  tab:
+    - ""
+    - "&f               Vous jouez sur &e&l%game%&f.               "
+    - ""
+    - "&fHôte: &b%host%"
+    - "&fStatut: &b%state%"
+    - ""
+  scoreboard:
+    waiting_players: "&cEn attente de joueurs..."
+    starting_game: "&aLancement de la partie !"
+    activated: "&a✔"
+    spectator: "&7Spectateur"
+    lobby:
+      - "&0"
+      - "%state%"
+      - "&1"
+      - "&fJeu: {uhc.name}"
+      - "&2"
+      - "&fHôte: &6%host%"
+      - "&fJoueurs: &6%players%&f/&6%slots%"
+      - "&3"
+      - "&fCréé par &eTitiLaPierre"
+    game:
+      - "&0"
+      - "&fJeu: {uhc.name}"
+      - "&2"
+      - "&fTemps: &6%timer%"
+      - "&fVotre Équipe: %team%"
+      - "&3"
+      - "&fÉquipes restantes: &6%teamsleft%"
+      - "&fJoueurs restants: &6%playersleft%"
+      - "&4"
+      - "&fCombat: &6%pvp%"
+      - "&fBordure: &6%border%"
+  inventory_editor:
+    exit_editor: "&7Cliquez pour sortir de l'éditeur."
+    open_editor:
+      - ""
+      - "&e&l  {uhc.prefix} Éditeur d'inventaire"
+      - ""
+      - "&f&l    &fVous entrez dans l'éditeur d'inventaire!"
+      - "&f&l      &8➥ &fSauvegarder: <tooltip:{uhc.inventory_editor.exit_editor}><command:/save>&a[➲ /save]&7 (Clic Gauche)"
+      - "&f&l      &8➥ &fAnnuler: <tooltip:{uhc.inventory_editor.exit_editor}><command:/cancel>&c[➲ /cancel]&7 (Clic Gauche)"
+      - ""
+    exit_editor: "{uhc.prefix} &fVous sortez de l'éditeur d'inventaire."
+    unsaved_items: "{uhc.prefix} &e%amount%&f objets n'ont pas pu être &esauvegardés&f."
+    edit: "&e&lVous éditez l'inventaire&8 ● &fSauvegarder: &a/save&8 ● &fAnnuler: &c/cancel"
+  annonce:
+    tooltip:
+      - "%name%"
+      - ""
+      - "&fType: {uhc.name}"
+      - "&fHôte: &b%host%"
+      - ""
+      - "&fJoueurs: &a%players%&8/&a%slots%"
+      - "&fScénarios:"
+      - "%scenarios%"
+      - ""
+      - "{uhc.gui.click_type.click_join}"
+    message:
+      - ""
+      - "{uhc.prefix} &b%host%&f a créer sa partie <command:/join %game%><tooltip:%tooltip%>&a➲ Rejoindre&7 (Clic Gauche)"
+      - ""
+  teams:
+    simple_blue: "&9Bleue"
+    simple_red: "&cRouge"
+    simple_light green: "&aVerte"
+    simple_yellow: "&eJaune"
+    simple_cyan: "&bCyan"
+    simple_pink: "&dRose"
+    simple_orange: "&6Orange"
+    #
+    heart_blue: "&9❤ Bleue"
+    heart_red: "&c❤ Rouge"
+    heart_light green: "&a❤ Verte"
+    heart_yellow: "&e❤ Jaune"
+    heart_cyan: "&b❤ Cyan"
+    heart_pink: "&d❤ Rose"
+    heart_orange: "&6❤ Orange"
+    #
+    plus_blue: "&9✚ Bleue"
+    plus_red: "&c✚ Rouge"
+    plus_light green: "&a✚ Verte"
+    plus_yellow: "&e✚ Jaune"
+    plus_cyan: "&b✚ Cyan"
+    plus_pink: "&d✚ Rose"
+    plus_orange: "&6✚ Orange"
+    #
+    flower_blue: "&9✿ Bleue"
+    flower_red: "&c✿ Rouge"
+    flower_light green: "&a✿ Verte"
+    flower_yellow: "&e✿ Jaune"
+    flower_cyan: "&b✿ Cyan"
+    flower_pink: "&d✿ Rose"
+    flower_orange: "&6✿ Orange"
+    #
+    skull_blue: "&9⚉ Bleue"
+    skull_red: "&c⚉ Rouge"
+    skull_light green: "&a⚉ Verte"
+    skull_yellow: "&e⚉ Jaune"
+    skull_cyan: "&b⚉ Cyan"
+    skull_pink: "&d⚉ Rose"
+    skull_orange: "&6⚉ Orange"
+  gui:
+    close: "&cFermer"
+    on_start: "&aAu lancement!"
+    back:
+      name: "&aRetour"
+      page_previous: "&7Page précédente"
+      page_next: "&7Page suivante"
+      lore:
+        - "&7Vers %gui%"
+    wip:
+      - "&fCette fonctionnalité"
+      - "&fn'a &cpas encore"
+      - "&fété ajouté."
+    disabled:
+      - "&7(Désactivé)"
+    name:
+      edit_config: "Éditer la partie"
+      join_game: "Rejoindre une partie"
+      choose_team: "Choix de l'équipe"
+      start_inventory: "Inventaire de départ"
+    type:
+      category: "&8Catégorie"
+      modifier: "&8Modificateur"
+      scenario: "&8Scénario"
+      potion: "&8Potion"
+      filter: "&8Filtre"
+    category_name:
+      game: "Jeu"
+      border: "Bordure"
+      inventory: "Inventaire"
+      scenario: "Scénarios"
+      config: "Config"
+      editConfig: "Config > Créer"
+    click_type:
+      click_start: "&eCliquez pour lancer!"
+      click_cancel: "&eCliquez pour arrêter!"
+      click_delete: "&eCliquez pour supprimer!"
+      click_see: "&eCliquez pour voir!"
+      click_annonce: "&eCliquez pour annoncer!"
+      click_edit: "&eCliquez pour modifier!"
+      click_enable: "&eCliquez pour activer!"
+      click_disable: "&eCliquez pour désactiver!"
+      click_craft: "&eCliquez pour fabriquer!"
+      click_join: "&eCliquez pour rejoindre!"
+      click_quit: "&eCliquez pour quitter!"
+      click_create: "&eCliquez pour créer!"
+      click_select: "&eCliquez pour sélectionner!"
+      #
+      right_previous: "&bClic droit: précédant"
+      right_remove: "&bClic droit: retirer"
+      left_next: "&eClic gauche: suivant"
+      left_add: "&eClic gauche: ajouter"
+      rlclick_enable: "&eClic gauche/droit: activer"
+      rlclick_disable: "&eClic gauche/droit: désactiver"
+      rlclick_apply: "&eClic gauche/droit: appliquer"
+      #
+      middle_config: "&bClic molette: configurer"
+      middle_delete: "&bClic molette: supprimer"
+      drop_reset: "&eTouche lâcher pour réinitialiser!"
+      #
+      selected: "&aSélectionné!"
+    main:
+      general:
+        name: "&7▎ &eGénéral &7▎"
+        lore:
+          - "{uhc.gui.type.category}"
+          - ""
+          - "&fModifiez ici les"
+          - "&aparamètres&f basique"
+          - "&fde cette partie."
+          - ""
+          - "{uhc.gui.click_type.click_see}"
+      game:
+        name: "&7▎ &eJeu &7▎"
+        lore:
+          - "{uhc.gui.type.category}"
+          - ""
+          - "&fVous trouverez ici les"
+          - "&eparamètres spécifiques"
+          - "&fà ce jeu."
+          - ""
+          - "{uhc.gui.click_type.click_see}"
+      border:
+        name: "&7▎ &eBordure &7▎"
+        lore:
+          - "{uhc.gui.type.category}"
+          - ""
+          - "&fDans cette catégorie"
+          - "&fvous pourrez &bparamétrer"
+          - "&fla &bbordure&f."
+          - ""
+          - "{uhc.gui.click_type.click_see}"
+      inventory:
+        name: "&7▎ &eInventaire &7▎"
+        lore:
+          - "{uhc.gui.type.category}"
+          - ""
+          - "&fIci, modifiez les"
+          - "&6inventaires&f de"
+          - "&fla partie."
+          - ""
+          - "{uhc.gui.click_type.click_see}"
+      scenarios:
+        name: "&7▎ &eScénarios &7▎"
+        lore:
+          - "{uhc.gui.type.category}"
+          - ""
+          - "&fAjoutez des &9scénarios"
+          - "&fà votre &9partie&f pour la"
+          - "&fcontrôler totalement."
+          - ""
+          - "{uhc.gui.click_type.click_see}"
+      config:
+        name: "&7▎ &eConfigurations &7▎"
+        lore:
+          - "{uhc.gui.type.category}"
+          - ""
+          - "&fEnregistrez puis importez une"
+          - "&econfiguration&f pour paramètrer"
+          - "&fla partie &arapidement&f."
+          - ""
+          - "{uhc.gui.click_type.click_see}"
+      manage_players:
+        name: "&7▎ &eGérer les joueurs &7▎"
+      delete:
+        name: "&cSupprimer la partie"
+        lore:
+          - "&7Un bouton plutôt"
+          - "&7dangereux..."
+          - ""
+          - "{uhc.gui.click_type.click_delete}"
+      start:
+        name: "&a✔ Lancer la partie"
+        lore:
+          - "&7Prêt à lancer ?"
+          - "&7Ça va commencer"
+          - ""
+          - "{uhc.gui.click_type.click_start}"
+      cancel:
+        name: "&cAnnuler le lancement"
+        lore:
+          - "{uhc.gui.click_type.click_cancel}"
+    general:
+      rename:
+        name: "&6✦ &eNom de la partie"
+        lore:
+          - "{uhc.gui.type.modifier}"
+          - ""
+          - "&fVous pouvez &emodifier"
+          - "&fle &enom&f de la partie."
+          - ""
+          - "{uhc.gui.click_type.click_edit}"
+      slots:
+        name: "&6✦ &ePlaces disponibles"
+        lore:
+          - "{uhc.gui.type.modifier}"
+          - ""
+          - "&b%slots%&f joueurs peuvent"
+          - "&ejouer&f sur cette &epartie&f."
+          - ""
+          - "{uhc.gui.click_type.right_remove}"
+          - "{uhc.gui.click_type.left_add}"
+      whitelist:
+        name: "&6✦ &eListe blanche"
+        lore:
+          - "{uhc.gui.type.modifier}"
+          - ""
+          - "%choice%"
+          - ""
+          - "%description%"
+          - ""
+          - "{uhc.gui.click_type.click_edit}"
+        public:
+          - "&a▏ Publique"
+          - "&7▏ Privée"
+        private:
+          - "&7▏ Publique"
+          - "&a▏ Privée"
+        public_lore:
+          - "&fVotre partie est &apublique&f."
+          - "&fTous les joueurs peuvent"
+          - "&fdonc la &arejoindre&f."
+        private_lore:
+          - "&fVotre partie est &cprivée&f."
+          - "&fSeul &cvous&f et les personnes"
+          - "&fsous &cliste-blanche&f peuvent la rejoindre."
+      annonce:
+        name: "&6✦ &eAnnoncer"
+        lore:
+          - "{uhc.gui.type.modifier}"
+          - ""
+          - "&fEnvoyez une &eannonce&f sur les"
+          - "&flobby pour proposer au joueurs"
+          - "&fde &erejoindre&f votre &epartie&f."
+          - ""
+          - "{uhc.gui.click_type.click_annonce}"
+      teams:
+        name: "&6✦ &eÉquipes"
+        lore:
+          - "{uhc.gui.type.modifier}"
+          - ""
+          - "%choice%"
+          - ""
+          - "&fDéfinissez combien de &ejoueurs"
+          - "&fseront &eprésent&f au maximum"
+          - "&fdans chaque &eéquipes&f."
+          - ""
+          - "{uhc.gui.click_type.right_previous}"
+          - "{uhc.gui.click_type.left_next}"
+        solo:
+          - "&a▏ Solo"
+          - "&7▏ Duo (to2)"
+          - "&7▏ Trio (to3)"
+          - "&7▏ Quatuor (to4)"
+          - "&7▏ Team (to5)"
+        duo:
+          - "&7▏ Solo"
+          - "&a▏ Duo (to2)"
+          - "&7▏ Trio (to3)"
+          - "&7▏ Quatuor (to4)"
+          - "&7▏ Team (to5)"
+        trio:
+          - "&7▏ Solo"
+          - "&7▏ Duo (to2)"
+          - "&a▏ Trio (to3)"
+          - "&7▏ Quatuor (to4)"
+          - "&7▏ Team (to5)"
+        quatuor:
+          - "&7▏ Solo"
+          - "&7▏ Duo (to2)"
+          - "&7▏ Trio (to3)"
+          - "&a▏ Quatuor (to4)"
+          - "&7▏ Team (to5)"
+        team:
+          - "&7▏ Solo"
+          - "&7▏ Duo (to2)"
+          - "&7▏ Trio (to3)"
+          - "&7▏ Quatuor (to4)"
+          - "&a▏ Team (to5)"
+    game:
+      pvp:
+        name: "&6✦ &eCombat"
+        lore:
+          - "{uhc.gui.type.category}"
+          - ""
+          - "&fTemps avant que le &ccombat"
+          - "&fentre &ejoueur&f soit &aactivé&f."
+          - ""
+          - "&fActivation: &6%time%"
+          - ""
+          - "{uhc.gui.click_type.click_see}"
+      potions:
+        name: "&6✦ &ePotions"
+        lore:
+          - "{uhc.gui.type.category}"
+          - ""
+          - "&fCette &ccatégorie&f n'a"
+          - "&caucun&f impact sur le"
+          - "&cjeu&f pour le &cmoment&f!"
+          - ""
+          - "{uhc.gui.click_type.click_see}"
+      day_night_cycle:
+        name: "&6✦ &eCycle jour/nuit"
+        lore:
+          - "{uhc.gui.type.modifier}"
+          - ""
+          - "%choice%"
+          - ""
+          - "&fDéfinit si le &ecycle&f jour/nuit"
+          - "&fest &eactif&f ou &ebloqué&f jour ou nuit."
+          - ""
+          - "{uhc.gui.click_type.right_previous}"
+          - "{uhc.gui.click_type.left_next}"
+        day_night:
+          - "&a▏ Cycle jour nuit"
+          - "&7▏ Jour seulement"
+          - "&7▏ Nuit seulement"
+        day:
+          - "&7▏ Cycle jour nuit"
+          - "&a▏ Jour seulement"
+          - "&7▏ Nuit seulement"
+        night:
+          - "&7▏ Cycle jour nuit"
+          - "&7▏ Jour seulement"
+          - "&a▏ Nuit seulement"
+      nether:
+        name: "&6✦ &eNether (Monde)"
+      spectators:
+        name: "&6✦ &eSpectateurs"
+        lore:
+          - "{uhc.gui.type.modifier}"
+          - ""
+          - "%choice%"
+          - ""
+          - "&fSi vous mourrez et que cette &eoption"
+          - "&fest &eactivé&f, vous pourrez &eregarder&f la"
+          - "&ffin de la partie en tant que &espectateur&f."
+          - ""
+          - "{uhc.gui.click_type.right_previous}"
+          - "{uhc.gui.click_type.left_next}"
+        all:
+          - "&a▏ Tout le monde"
+          - "&7▏ Joueurs seulement"
+          - "&7▏ Personne"
+        players:
+          - "&7▏ Tout le monde"
+          - "&a▏ Joueurs seulement"
+          - "&7▏ Personne"
+        none:
+          - "&7▏ Tout le monde"
+          - "&7▏ Joueurs seulement"
+          - "&a▏ Personne"
+    pvp:
+      remove10min: "&c- 10 minutes"
+      remove1min: "&6- 1 minute"
+      remove30s: "&e- 30 secondes"
+      #
+      add30s: "&a+ 30 secondes"
+      add1min: "&2+ 1 minute"
+      add10min: "&b+ 10 minutes"
+    potions:
+      potionFormat:
+        name: "&6✦ &e%potion%"
+        lore:
+          - "{uhc.gui.type.potion}"
+          - ""
+          - "%choice%"
+          - ""
+          - "&fInfos complémentaires:"
+          - "%additions%"
+          - ""
+          - "{uhc.gui.click_type.click_%enableState%}"
+      extendedPotions:
+        name: "&6✦ &ePotions allongées"
+        lore:
+          - "{uhc.gui.type.modifier}"
+          - ""
+          - "%choice%"
+          - ""
+          - "&fLes potions &eallongées"
+          - "&fdurent plus longtemps"
+          - "&fque celles par &edéfaut&f."
+          - ""
+          - "{uhc.gui.click_type.click_%enableState%}"
+      strongPotions:
+        name: "&6✦ &ePotions améliorées"
+        lore:
+          - "{uhc.gui.type.modifier}"
+          - ""
+          - "%choice%"
+          - ""
+          - "&fLes potions &eaméliorées"
+          - "&fsont plus puissante"
+          - "&fque celles par &edéfaut&f."
+          - ""
+          - "{uhc.gui.click_type.click_%enableState%}"
+      enabled:
+        - "&a▏ Activée"
+        - "&7▏ Désactivée"
+      disabled:
+        - "&7▏ Activée"
+        - "&a▏ Désactivée"
+      tag:
+        base: "Par défaut"
+        extended: "Allongée"
+        strong: "Améliorée"
+    border:
+      time:
+        name: "&6✦ &eActivation (Bordure)"
+        lore:
+          - "{uhc.gui.type.category}"
+          - ""
+          - "&fTemps avant que la &bbordure"
+          - "&fcommence à &brétrécir&f."
+          - ""
+          - "&fActivation: &6%time%"
+          - ""
+          - "{uhc.gui.click_type.click_see}"
+        remove10min: "&c- 10 minutes"
+        remove1min: "&6- 1 minute"
+        remove30s: "&e- 30 secondes"
+        add30s: "&a+ 30 secondes"
+        add1min: "&2+ 1 minute"
+        add10min: "&b+ 10 minutes"
+      speed:
+        name: "&6✦ &eRapidité (Bordure)"
+        speed: "bloc(s)/s"
+        remove1block: "&6- 1 bloc/s"
+        removeHalfBlock: "&e- 0.5 bloc/s"
+        addHalfBlock: "&a+ 0.5 bloc/s"
+        add1block: "&2+ 1 bloc/s"
+        lore:
+          - "{uhc.gui.type.category}"
+          - ""
+          - "&fVistesse de la &bbordure"
+          - "&fen blocs &bpar&f seconde."
+          - ""
+          - "&fVitesse: &6%speed%"
+          - ""
+          - "{uhc.gui.click_type.click_see}"
+      start:
+        name: "&6✦ &eTaille de départ (Bordure)"
+        lore:
+          - "{uhc.gui.type.category}"
+          - ""
+          - "&fTaille de la &bbordure"
+          - "&fau début de la &bpartie&f."
+          - ""
+          - "&fTaille: &6%size% blocs"
+          - ""
+          - "{uhc.gui.click_type.click_see}"
+      end:
+        name: "&6✦ &eTaille de fin (Bordure)"
+        lore:
+          - "{uhc.gui.type.category}"
+          - ""
+          - "&fTaille de la &bbordure"
+          - "&fà la fin de son"
+          - "&brétrécissement&f."
+          - ""
+          - "&fTaille: &6%size% blocs"
+          - ""
+          - "{uhc.gui.click_type.click_see}"
+      remove100blocks: "&c- 100 blocs"
+      remove50blocks: "&6- 50 blocs"
+      remove10blocks: "&e- 10 blocs"
+      add10blocks: "&a+ 10 blocs"
+      add50blocks: "&2+ 50 blocs"
+      add100blocks: "&b+ 100 blocs"
+    inventory:
+      edit:
+        name: "&6✦ &eModifier l'inventaire"
+        lore:
+          - "{uhc.gui.type.modifier}"
+          - ""
+          - "&fAu début de la partie,"
+          - "&fles joueurs &erecevront"
+          - "&fcet &einventaire&f."
+          - ""
+          - "{uhc.gui.click_type.click_edit}"
+      see:
+        name: "&6✦ &eVoir l'inventaire"
+        lore:
+          - "{uhc.gui.type.category}"
+          - ""
+          - "&fAu début de la partie,"
+          - "&fles joueurs &erecevront"
+          - "&fcet &einventaire&f."
+          - ""
+          - "{uhc.gui.click_type.click_see}"
+    team_choice:
+      name: "Choix de l'équipe"
+      teamFormat:
+        name: "&fÉquipe %team%"
+        lore:
+          - "%players%"
+          - ""
+          - "{uhc.gui.click_type.click_%joinState%}"
+      random:
+        name: "&fÉquipe &daléatoire"
+        lore:
+          - "{uhc.gui.click_type.click_select}" 
+    start_inventory: "Inventaire de départ"
+    config:
+      new:
+        name: "&a✚ Nouvelle configuration"
+        lore:
+          - "{uhc.gui.click_type.click_create}"
+      configFormat:
+        name: "&6✦ &e%name%"
+        lore:
+          - "{uhc.gui.click_type.middle_delete}"
+          - "{uhc.gui.click_type.rlclick_apply}"
+      select_icon:
+        name: "&6✦ &eIcône"
+        lore:
+          - "{uhc.gui.type.category}"
+          - ""
+          - "&fModifie l'icône de la"
+          - "&econfiguration&f pour"
+          - "&fmieux t'y retrouver."
+          - ""
+          - "&fIcône:"
+          - "&9%icon%"
+          - ""
+          - "{uhc.gui.click_type.click_see}"
+      set_name:
+        name: "&6✦ &eNom"
+        lore:
+          - "{uhc.gui.type.category}"
+          - ""
+          - "&fModifie le nom de la"
+          - "&econfiguration&f pour"
+          - "&ffacilement l'identifier."
+          - ""
+          - "&fNom:"
+          - "&9%name%"
+          - ""
+          - "{uhc.gui.click_type.click_see}"
+      undefined: "&cIndéfini!"
+      create_config_enabled:
+        name: "&a✚ Créer la configuration"
+        lore:
+          - "{uhc.gui.click_type.click_create}"
+      create_config_disabled:
+        name: "&c✚ Créer la configuration"
+      enter_name: "Entrez le nom ici"
+    scenarios:
+      scenarioFormat:
+        name: "&6✦ &e%name%"
+        lore:
+          - "{uhc.gui.type.scenario}"
+          - ""
+          - "%lore%"
+          - ""
+          - "{uhc.gui.click_type.middle_config}"
+          - "{uhc.gui.click_type.rlclick_%enableState%}"
+    join_game:
+      name: "Rejoindre une partie"
+      no_game:
+        name: "&cC'est vide par ici..."
+        lore:
+          - "&7Aucune partie de lancée"
+          - "&7pour le moment. Créez-en une"
+          - "&7ou revenez plus tard !"
+      and_more: "&7et %amount% en plus..."
+      format:
+        name: "&6✦ &e%name%"
+        lore:
+          - "&8%gameid%"
+          - ""
+          - "&fType: {uhc.name}"
+          - "&fHôte: &b%host%"
+          - "&fStatut: &b%state%"
+          - ""
+          - "&fÉquipes: &b%teams%"
+          - "&fScénarios:"
+          - "%scenarios%"
+          - ""
+          - "&fJoueurs: &a%players%&f/&a%slots%"
+          - ""
+          - "{uhc.gui.click_type.click_join}"
+      teams:
+        1: "Solo"
+        2: "Duo"
+        3: "Trio"
+        4: "Quatuor"
+        5: "Team"
+      state:
+        waiting: "En attente..."
+        starting: "Lancement..."
+        ingame: "En jeu!"
+        ended: "Terminé."
+      no_scenarios: "&bAucun scénario."
+      and_more: "&7et %amount% en plus..."
+    brewing_stand:
+      name: "Alambic"
+      normal:
+        name: "&6✦ &ePotions buvable"
+        lore:
+          - "{uhc.gui.type.filter}"
+          - ""
+          - "&fCréer des &epotions"
+          - "&fà boire."
+          - ""
+          - "{uhc.gui.click_type.click_select}"
+      splash:
+        name: "&6✦ &ePotions jetable"
+        lore:
+          - "{uhc.gui.type.filter}"
+          - ""
+          - "&fCréer des &epotions"
+          - "&fà jeter."
+          - ""
+          - "{uhc.gui.click_type.click_select}"
+      base:
+        name: "&6✦ &ePotions basiques"
+        lore:
+          - "{uhc.gui.type.filter}"
+          - ""
+          - "&fDe simple &epotion"
+          - "&fde niveau 1."
+          - ""
+          - "{uhc.gui.click_type.click_select}"
+      extended:
+        name: "&6✦ &ePotions allongées"
+        lore:
+          - "{uhc.gui.type.filter}"
+          - ""
+          - "&fDes &epotions&f qui durent"
+          - "&fplus dans le temps."
+          - ""
+          - "{uhc.gui.click_type.click_select}"
+      strong:
+        name: "&6✦ &ePotions améliorées"
+        lore:
+          - "{uhc.gui.type.filter}"
+          - ""
+          - "&fDes &epotions&f qui ont"
+          - "&fun effet plus puissant."
+          - ""
+          - "{uhc.gui.click_type.click_select}"
+      format:
+        name: "&6✦ &e%name% &8x3"
+        lore:
+          - "{uhc.gui.type.potion}"
+          - ""
+          - "&fEffet: &9%effect%"
+          - "&fDurée: &9%duration%"
+          - ""
+          - "&8Coût"
+          - "%cost%"
+          - ""
+          - "{uhc.gui.click_type.click_create}"
+        formatStrong: "%effect% II &7(2)"
+        instant: "Instantané"
+        not_enough_place:
+          - "&cIl n'y a pas assez de place"
+          - "&cdans votre inventaire!"
+potions:
+  night_vision:
+    name: "Potion de vision nocturne"
+    effect: "Nyctalopie"
+  invisibility:
+    name: "Potion d'invisibilité"
+    effect: "Invisibilité"
+  leaping:
+    name: "Potion de saut"
+    effect: "Sauts améliorés"
+  fire_resistance:
+    name: "Potion de résistance au feu"
+    effect: "Résistance au feu"
+  speed:
+    name: "Potion de rapidité"
+    effect: "Rapidité"
+  slowness:
+    name: "Potion de lenteur"
+    effect: "Lenteur"
+  water_breathing:
+    name: "Potion de respiration aquatique"
+    effect: "Apnée"
+  health:
+    name: "Potion de soin"
+    effect: "Soin instantané"
+  harming:
+    name: "Potion de dégâts"
+    effect: "Dégâts instantanés"
+  poison:
+    name: "Potion de poison"
+    effect: "Poison"
+  regeneration:
+    name: "Potion de régénération"
+    effect: "Régénération"
+  strength:
+    name: "Potion de force"
+    effect: "Force"
+  weakness:
+    name: "Potion de faiblesse"
+    effect: "Faiblesse"
+items:
+  blaze_powder: "Poudre de Blaze"
+  redstone: "Redstone"
+  glowstone: "Poudre lumineuse"
+  water_bottle: "Fiole d'eau"
+  nether_wart: "Verrues du Nether"
+  fermented_spider_eye: "Oeil d'araignée fermenté"
+  gun_powder: "Poudre à canon"
+  #
+  golden_carrot: "Carotte dorée"
+  rabbit_foot: "Patte de lapin"
+  magma_cream: "Crème de magma"
+  sugar: "Sucre"
+  pufferfish: "Poisson-globe"
+  golden_melon: "Pastèque scintillante"
+  spider_eye: "Oeil d'araignée"
+  ghast_tear: "Larme de Ghast"
+  #
+  night_vision_potion: "Potion de vision nocturne"
+  invisibility_potion: "Potion d'invisibilité"
+  leaping_potion: "Potion de saut"
+  fire_resistance_potion: "Potion de résistance au feu"
+  speed_potion: "Potion de rapidité"
+  slowness_potion: "Potion de lenteur"
+  water_breathing_potion: "Potion de respiration aquatique"
+  health_potion: "Potion de soin instantané"
+  harming_potion: "Potion de dégâts instantanés"
+  poison_potion: "Potion de poison"
+  regeneration_potion: "Potion de régénération"
+  strength_potion: "Potion de force"
+  weakness_potion: "Potion de faiblesse"
+  #
+  wooden_sword: "Épée en bois"
+  stone_sword: "Épée en pierre"
+  iron_sword: "Épée en fer"
+  golden_sword: "Épée en or"
+  diamond_sword: "Épée en diamant"
+  #
+  iron_pickaxe: "Pioche en fer"
+  diamond_pickaxe: "Pioche en diamant"
+  iron_chestplate: "Plastron en fer"
+  golden_chestplate: "Plastron en or"
+  diamond_chestplate: "Plastron en diamant"
+  #
+  iron_axe: "Hache en fer"
+  golden_axe: "Hache en or"
+  stick: "Bâton"
+  anvil: "Enclume"
+  enchanting_table: "Table d'enchantement"
+  #
+  chest: "Coffre"
+  bookshelf: "Bibliothèque"
+  tnt: "TNT"
+  bedrock: "Bedrock"
+  packed_ice: "Glace compactée"
+  #
+  grass_block: "Bloc d'herbe"
+  cobblestone: "Pierres"
+  bread: "Pain"
+  ender_pearl: "Perle de l'Ender"
+scenarios:
+  diamondLimit:
+    name: "Diamond Limit"
+    lore:
+      - "&fAjoute une &climite&f de"
+      - "&bdiamants&f récupérable"
+      - "&fpar les joueurs."
+    gui:
+      remove5: "&6- 5 diamants"
+      remove1: "&6- 1 diamant"
+      add1: "&a+ 1 diamant"
+      add5: "&2+ 5 diamants"
+      limit: "&fLimite: &6%limit% diamants"
+    limit_warn: "&eAttention: &fVous avez &aatteint&f votre &climite&f de diamants."
+    limit_error: "&cVous ne pouvez plus récupérer de diamants!"
+  cutClean:
+    name: "Cut Clean"
+    lore:
+      - "&fCuit automatiquement la"
+      - "&dnourriture&f et les &bminerais&f."
+  leech:
+    name: "Sangsue"
+    lore:
+      - "&fRedonne de la &cvie&f à un"
+      - "&fjoueur à chaque &célimination&f."
+    gui:
+      remove1: "&6- 1 coeur"
+      removeHalf: "&6- 0.5 coeur"
+      addHalf: "&a+ 0.5 coeur"
+      add1: "&2+ 1 coeur"
+      life: "&fVie donné: &c%life% ❤"
+  deadlyApple:
+    name: "Pommmes Mortelles"
+    lore:
+      - "&fDonne des &epommes dorées&f"
+      - "&fsupplémentaire à la mort"
+      - "&fd'un joueur."
+    gui:
+      remove3: "&6- 3 pommes dorées"
+      remove1: "&6- 1 pomme dorée"
+      add1: "&a+ 1 pomme dorée"
+      add3: "&2+ 3 pommes dorées"
+      apple: "&fPommes dorées: &e%apple%"
+  veinMiner:
+    name: "Vein Miner"
+    lore:
+      - "&fDétruit les fillons de"
+      - "&bminerais&f entier avec"
+      - "&fun seul coup de pioche."

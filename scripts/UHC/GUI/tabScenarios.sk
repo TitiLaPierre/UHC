@@ -1,0 +1,102 @@
+Options:
+	sound-error: entity.villager.no
+	sound-success: block.note.pling
+	sound-click: ui.button.click
+
+Function uhcHostTabScenarios(p: player, page: text=0):
+	set {_game} to {host-player::%{_p}%}
+
+	add all integers between 10 and 16 to {_slots::*}
+	add all integers between 19 and 25 to {_slots::*}
+	add all integers between 28 and 34 to {_slots::*}
+	add all integers between 37 and 43 to {_slots::*}
+	set {_index} to 28*{_page}
+	set {_calcBack} to {_index}-1
+	if element {_calcBack} of {scenarios::list::*} is set:
+		{_calcBack} > 0
+		set {inv::%{_p}%::page::back} to true
+		set slot 45 of open inventory of {_p} to an arrow named string("uhc.gui.back.page_previous", {_p})
+	loop 28 times:
+		add 1 to {_index}
+		add element {_index} of {scenarios::list::*} to {_return::*}
+	set {_calcNext} to {_index}+1
+	set {inv::%{_p}%::page::index} to {_page}
+	if element {_calcNext} of {scenarios::list::*} is set:
+		set {inv::%{_p}%::page::next} to true
+		set slot 53 of open inventory of {_p} to an arrow named string("uhc.gui.back.page_next", {_p})
+	set {_index} to 1
+	loop {_return::*}:
+		if {scenarios::s::%loop-value%::config} is not true:
+			set {_removeConfigLine} to true
+		if {host::%{_game}%::scenarios::*} doesn't contain loop-value:
+			set {_removeConfigLine} to true
+			set {_enableState} to "enable"
+		else:
+			set {_enableState} to "disable"
+		set {_scenarioName} to string("scenarios.%loop-value%.name", {_p})
+		set {_lore} to join strings("scenarios.%loop-value%.lore", {_p}) by nl
+		set {_item} to {scenarios::s::%loop-value%::item} named string("uhc.gui.scenarios.scenarioFormat.name", {_p}, "name;%{_scenarioName}%")
+		set {_item} to {_item} with all flags hidden
+		set lore of {_item} to colored strings("uhc.gui.scenarios.scenarioFormat.lore", {_p}, ("lore;%{_lore}%", "enableState;%{_enableState}%"))
+		if {_removeConfigLine} is true:
+			set {_size} to size of lore of {_item}
+			remove 1 from {_size}
+			clear line {_size} of lore of {_item}
+		if {host::%{_game}%::scenarios::*} contain loop-value:
+			set {_item} to glowing {_item}
+		set {_slot} to {_slots::%{_index}%}
+		set slot {_slot} of open inventory of {_p} to {_item}
+		set {inv::%{_p}%::slot::%{_slot}%} to loop-value
+		add 1 to {_index}
+		clear {_removeConfigLine}
+
+	set {cooldown::%{_p}%} to true
+	wait 0.1 second
+	clear {cooldown::%{_p}%}
+
+On inventory click:
+	event-inventory is not player's inventory
+	set {_game} to {host-player::%player%}
+	{inv::%player%} start with "setup_scenario_%{_game}%"
+	event-clicktype is not left mouse button with shift or right mouse button with shift
+	{cooldown::%player%} is not set
+	set {cooldown::%player%} to true
+	if event-slot is 45:
+		{inv::%player%::page::back} is true
+		set {_} to {inv::%player%::page::index}-1
+		uhcHostUpdate(player, "scenario", "%{_}%")
+		play sound "{@sound-click}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 53:
+		{inv::%player%::page::next} is true
+		set {_} to {inv::%player%::page::index}+1
+		uhcHostUpdate(player, "scenario", "%{_}%")
+		play sound "{@sound-click}" with volume 0.8 and pitch 1 at player for player
+	else:
+		set {_slot} to index of event-slot
+		set {_id} to {inv::%player%::slot::%{_slot}%}
+		{_id} is set
+		if event-clicktype is right mouse button or left mouse button:
+			set {_values::string} to {_id}
+			set {_values::player} to player
+			{host::%{_game}%::scenarios::*} contain {_id}:
+				remove all {_id} from {host::%{_game}%::scenarios::*}
+				call custom event "uhc.scenariodisable" with event-values {_values::*}
+			else:
+				add {_id} to {host::%{_game}%::scenarios::*}
+				call custom event "uhc.scenarioenable" with event-values {_values::*}
+			uhcHostUpdate(player, "scenario","%{inv::%player%::page::index}%")
+			play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+		else if event-clicktype is middle mouse button:
+			{host::%{_game}%::scenarios::*} contain {_id}
+			{scenarios::s::%{_id}%::config} is true
+			uhcHostUpdate(player, "sConfig", {_id})
+			set {_values::string} to {_id}
+			set {_values::player} to {_p}
+	wait 0.1 second
+	clear {cooldown::%player%}
+
+Function uhcHostTabSC(p: player, id: string):
+	set {inv::%{_p}%::back} to "scenario"
+	set {_values::string} to {_id}
+	set {_values::player} to {_p}
+	call custom event "uhc.scenarioconfig" with event-values {_values::*}

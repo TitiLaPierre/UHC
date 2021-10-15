@@ -1,0 +1,21 @@
+import:
+	org.bukkit.event.player.PlayerItemHeldEvent
+
+Custom event "import.hotbar_change":
+	pattern: (hotbar|held) (item|slot) (switch|change)
+	event-values: player
+
+On PlayerItemHeldEvent:
+	set {_values::player} to event.getPlayer()
+	set {_data::past} to event.getPreviousSlot()
+	set {_data::new} to event.getNewSlot()
+	call custom event "import.hotbar_change" with event-values {_values::*} and with data {_data::*}
+
+Non-single expression [the] (1¦past|2¦(new|future)) (hotbar|held) (slot|item):
+	usable in:
+		custom event "import.hotbar_change"
+	get:
+		if parse mark is 1:
+			return event.getData("past")
+		else if parse mark is 2:
+			return event.getData("new")

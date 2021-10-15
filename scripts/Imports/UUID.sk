@@ -1,0 +1,14 @@
+Options:
+	chars: abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
+
+Function UUID() :: string:
+	while {_stop} is not set:
+		set {_chars} to "{@chars}"
+		loop 8 times:
+			set {_uuid} to join {_uuid} and random element of {_chars} split at ""
+		set {_stop} to true if ({uuid::*} doesn't contain {_uuid})
+	add {_uuid} to {uuid::*}
+	return {_uuid}
+
+Function destroyUUID(uuid: string):
+	remove {_uuid} from {uuid::*}

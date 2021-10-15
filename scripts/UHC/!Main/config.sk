@@ -1,0 +1,56 @@
+On load:
+	load yml "plugins/UHC/config.yml" as "uhc_config"
+	load yml "plugins/UHC/potions.yml" as "uhc_potions"
+	set {host-config::icons::*} to yml list "configurations.icons" in "uhc_config"
+	loop yml node list "items" in "uhc_config":
+		set {_id} to loop-value
+		replace all "items." in {_id} with ""
+		#
+		set {host-config::items::%{_id}%} to yml value "%loop-node%" in "uhc_config" parsed as itemtype
+	loop "base", "extended" and "strong":
+		set {_type} to loop-value
+		loop yml node list "%loop-value%" in "uhc_potions":
+			set {_id} to loop-value-2
+			replace all "%{_type}%." in {_id} with ""
+			#
+			add {_id} to {host-config::potion::category::%{_type}%::*}
+			set {_propId} to "%{_type}%_%{_id}%"
+			set {host-config::potion::item::%{_propId}%::resultId} to yml value "%loop-value-2%.result" in "uhc_potions"
+			set {host-config::potion::item::%{_propId}%::splashResultId} to join "splash" and {host-config::potion::item::%{_propId}%::resultId} by "_"
+			set {host-config::potion::item::%{_propId}%::duration} to yml value "%loop-value-2%.duration" in "uhc_potions"
+			set {host-config::potion::item::%{_propId}%::cost::*} to yml list "%loop-value-2%.cost" in "uhc_potions"
+			if {_type} is "extended":
+				add "redstone" to {host-config::potion::item::%{_propId}%::cost::*}
+			else if {_type} is "strong":
+				add "glowstone" to {host-config::potion::item::%{_propId}%::cost::*}
+			add "blaze_powder" to {host-config::potion::item::%{_propId}%::cost::*}
+
+On unload:
+	unload yml "uhc_config"
+	clear {host-config::*}
+
+Function uhcPotionsCheck(game: string):
+	clear {host::%{_game}%::game::potions::extended::*} and {host::%{_game}%::game::potions::strong::*}
+	loop {host-config::potion::category::base::*}:
+		loop "extended" and "strong":
+			{host-config::potion::category::%loop-value-2%::*} contain loop-value-1
+			{host::%{_game}%::game::potions::base::*} contain loop-value-1
+			add loop-value-1 to {host::%{_game}%::game::potions::%loop-value-2%::*}
+
+Function uhcError(title: string, lore: string, file: string, section: string, addition: string):
+	set {_title} to "Unknown error" if ({_title} is not set)
+	set {_lore} to "No description!" if ({_lore} is not set)
+	set {_file} to "Unknown file" if ({_file} is not set)
+	set {_section} to "Unknown section" if ({_section} is not set)
+	set {_addition} to "No addition" if ({_addition} is not set)
+	send "" to console
+	send "&c&l  UHC - Error" to console
+	send "" to console
+	send "&c&l    %{_title}%" to console
+	send "&c&l      %{_lore}%" to console
+	send "" to console
+	send "&c&l      File: %{_file}%" to console
+	send "&c&l      Section: %{_section}%" to console
+	send "" to console
+	send "&c&l      %{_addition}%" to console
+	send "" to console

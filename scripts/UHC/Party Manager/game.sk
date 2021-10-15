@@ -1,0 +1,79 @@
+Function uhcPartyPvp(game: text):
+	loop {host::%{_game}%::p::*}:
+		send string("uhc.warnings.pvp_enabled", loop-value) to loop-value
+
+Function uhcPartyBorder(game: text):
+	loop {host::%{_game}%::p::*}:
+		send string("uhc.warnings.border_enabled", loop-value) to loop-value
+	set {_distance} to difference between {host::%{_game}%::game::bEnd} and {host::%{_game}%::game::bStart}
+	set {_time} to {_distance}/{host::%{_game}%::game::bSpeed}
+	set {_time} to "%{_time}% seconds" parsed as timespan
+	set {_border} to worldborder of world({_game})
+	set diameter of worldborder {_border} over {_time} to {host::%{_game}%::game::bEnd}
+
+Function uhcPartyInvincibility(game: text):
+	if {host::%{_game}%::timer} is 30:
+		clear {host::%{_game}%::nodamage}
+		loop {host::%{_game}%::p::*}:
+			send action bar string("uhc.game_management.invincibility_disabled", loop-value) to loop-value
+			send string("uhc.warnings.damage_enabled", loop-value) to loop-value
+	else:
+		set {_time} to 30-{host::%{_game}%::timer}
+		set {_time} to time("%{_time}% seconds" parsed as timespan)
+		loop {host::%{_game}%::p::*}:
+			set {_bar} to string("uhc.game_management.invincibility", loop-value, "time;%{_time}%")
+			send action bar {_bar} to loop-value
+
+Function uhcPartyEndGame(game: text):
+	if {host::%{_game}%::timer} is 18000:
+		uhcWin({_game}, 2)
+	else:
+		loop {host::%{_game}%::p::*}:
+			set {_time} to time("%18000-{host::%{_game}%::timer}% seconds" parsed as timespan)
+			if {host::%{_game}%::timer} is 16200, 16800, 17400, 17700 or 17940:
+				send string("uhc.warnings.end_game", loop-value, "time;%{_time}%") to loop-value
+			set {_bar} to string("uhc.warnings.end_game", loop-value, "time;%{_time}%")
+			send action bar {_bar} to loop-value
+
+Function uhcPartyDeath(p: player, a: player):
+	set {_game} to {host-player::%{_p}%}
+	set {_team} to {host-player::%{_p}%::team}
+	remove {_p} from {host::%{_game}%::p::*}
+	add {_p} to {host::%{_game}%::spec::*}
+	strike lightning effect at {_p}
+	delete {_p}'s sidebar
+	set {_p}'s gamemode to spectator
+	uhcScoreGameOpen({_p})
+	loop {host::%{_game}%::p::*} and {host::%{_game}%::spec::*}:
+		set {_teamName} to uhcGetFormattedTeam({_team}, loop-value)
+		set {_victim} to uhcGetFormattedPlayer({_p})
+		if {_a} is set:
+			set {_attacker} to uhcGetFormattedPlayer({_a})
+			send string("uhc.game_management.dead_by_player", loop-value, ("victim;%{_victim}%", "attacker;%{_attacker}%")) to loop-value
+		else:
+			send string("uhc.game_management.other_death", loop-value, "victim;%{_victim}%") to loop-value
+		uhcScoreGameUpdate(loop-value)
+	set {_items::*} to all items in {_p}'s inventory
+	remove {_p} from {host::%{_game}%::game::team::%{_team}%::*}
+	if size of {host::%{_game}%::game::team::%{_team}%::*} is 0:
+		remove {_team} from {host::%{_game}%::teams::*}
+		loop {host::%{_game}%::p::*} and {host::%{_game}%::spec::*}:
+			set {_teamName} to uhcGetFormattedTeam({_team}, loop-value)
+			send string("uhc.game_management.team_eliminated", loop-value, "team;%{_teamName}%") to loop-value
+	uhcTab()
+	uhcCheckWin({_game})
+
+Function uhcPartyToLobby(p: player):
+	broadcast "%{_p}%"
+	set {_game} to {host-player::%{_p}%}
+	if {host-player::%{_p}%::toLobby} is not set:
+		set {host-player::%{_p}%::toLobby} to {_game}
+		send formatted colored string("uhc.game_management.join_lobby", {_p}) to {_p}
+		send formatted colored string("uhc.game_management.to_lobby", {_p}) to {_p}
+		wait 25 seconds
+		{host-player::%{_p}%::toLobby} is {_game}
+		uhcLeave({_p})
+	else:
+		send formatted colored string("uhc.game_management.join_lobby", {_p}) to {_p}
+		send formatted colored string("uhc.game_management.to_lobby", {_p}) to {_p}
+		send "" to {_p}

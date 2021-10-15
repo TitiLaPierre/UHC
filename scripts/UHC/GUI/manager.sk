@@ -1,0 +1,218 @@
+Options:
+	error: &c
+	info: &e
+
+Function uhcManageInventory(p: player):
+	set {_game} to {host-player::%{_p}%}
+	if {host-list::*} doesn't contain {_game}:
+		send string("uhc.error.game_does_not_exist", {_p}) to {_p}
+	else if {host::%{_game}%::host} is not {_p}:
+		send string("uhc.error.not_host", {_p}) to {_p}
+	else:
+		set {host-task::%{_p}%} to "inv_%{_game}%"
+		clear {_p}'s inventory
+		set {_p}'s gamemode to creative
+		set fly mode of {_p} to false
+		set {_p}'s helmet to {host::%{_game}%::inv::helmet}
+		set {_p}'s chestplate to {host::%{_game}%::inv::chestplate}
+		set {_p}'s leggings to {host::%{_game}%::inv::leggings}
+		set {_p}'s boots to {host::%{_game}%::inv::boots}
+		loop 36 times:
+			set slot loop-number - 1 of {_p} to {host::%{_game}%::inv::slots::%loop-number - 1%}
+		send formatted colored strings("uhc.inventory_editor.open_editor", {_p}) to {_p}
+		create bossbar titled string("uhc.inventory_editor.edit", {_p}) and id "edit_inventory_%{_p}%" for {_p} with progress 100 with colors yellow
+
+
+Function uhcManageAnnonce(p: player):
+	set {_game} to {host-player::%{_p}%}
+	if {host-list::*} doesn't contain {_game}:
+		send string("uhc.error.game_does_not_exist", {_p}) to {_p}
+	else if {host::%{_game}%::host} is not {_p}:
+		send string("uhc.error.not_host", {_p}) to {_p}
+	else:
+		set {_name} to {host::%{_game}%::name}
+		set {_host} to {host::%{_game}%::host}
+		set {_players} to size of {host::%{_game}%::p::*}
+		set {_slots} to {host::%{_game}%::slots}
+		set {_scenariosList::*} to {host::%{_game}%::scenarios::*}
+		loop {_scenariosList::*}:
+			if size of {_scenarios::*} < 3:
+				remove loop-value from {_scenariosList::*}
+				set {_scenarioName} to string("scenarios.%loop-value%.name", {_p})
+				add "&7- %{_scenarioName}%" to {_scenarios::*}
+			else if size of {_scenarios::*} is 3:
+				add string("uhc.gui.join_game.and_more", {_p}, "amount;%size of {_scenariosList::*}%") to {_scenarios::*}
+		if {_scenarios::*} is set:
+			set {_scenarios} to join {_scenarios::*} by nl
+		else:
+			set {_scenarios} to string("uhc.gui.join_game.no_scenarios", {_p})
+		#
+		set {_tooltip} to join strings("uhc.annonce.tooltip", {_p}, ("name;%{_name}%", "host;%{_host}%", "players;%{_players}%", "slots;%{_slots}%", "scenarios;%{_scenarios}%")) by nl
+		#
+		send formatted strings("uhc.annonce.message", {_p}, ("host;%{_host}%", "game;%{_game}%", "tooltip;%{_tooltip}%")) to all players
+
+Function uhcManageResetInventory(p: player):
+	set {_game} to {host-player::%{_p}%}
+	if {host-list::*} doesn't contain {_game}:
+		send string("uhc.error.game_does_not_exist", {_p}) to {_p}
+	else if {host::%{_game}%::host} is not {_p}:
+		send string("uhc.error.not_host", {_p}) to {_p}
+	else:
+		clear {host::%{_game}%::inv::*}
+
+On command "/say":
+	set {_game} to {host-player::%player%}
+	{host::%{_game}%::host} is player
+	cancel event
+	if arguments is not set:
+		send string("uhc.error.syntax", player, "syntax;/say <message>")
+	else:
+		send "" to {host::%{_game}%::p::*} and {host::%{_game}%::spec::*}
+		send string("uhc.host_say", {_p}, ("player;%{_p}%", "message;%arguments%")) to {host::%{_game}%::p::*} and {host::%{_game}%::spec::*}
+		send "" to {host::%{_game}%::p::*} and {host::%{_game}%::spec::*}
+
+On command "/save":
+	set {_game} to {host-player::%player%}
+	{host::%{_game}%::host} is player
+	{host-task::%player%} is "inv_%{_game}%"
+	cancel event
+	if arguments is set:
+		send string("uhc.error.syntax", player, "syntax;/save")
+	else:
+		set {host::%{_game}%::inv::helmet} to player's helmet
+		set {host::%{_game}%::inv::chestplate} to player's chestplate
+		set {host::%{_game}%::inv::leggings} to player's leggings
+		set {host::%{_game}%::inv::boots} to player's boots
+		loop 36 times:
+			set {_item} to slot loop-number - 1 of player
+			if {_item} is barrier block, end portal frame or bedrock:
+				add item amount of {_item} to {_unsupportedObjects}
+			else:
+				set {host::%{_game}%::inv::slots::%loop-number - 1%} to {_item}
+		clear {host-task::%player%}
+		uhcWaitingInventory(player)
+		send formatted colored string("uhc.inventory_editor.exit_editor", player) to player
+		if {_unsupportedObjects} is set:
+			send formatted colored string("uhc.inventory_editor.unsaved_items", player) to player
+		remove bossbar "edit_inventory_%player%"
+
+On command "/cancel":
+	set {_game} to {host-player::%player%}
+	{host::%{_game}%::host} is player
+	{host-task::%player%} is "inv_%{_game}%"
+	cancel event
+	if arguments is set:
+		send string("uhc.error.syntax", player, "syntax;/cancel")
+	else:
+		clear {host-task::%player%}
+		uhcWaitingInventory(player)
+		send formatted colored string("uhc.inventory_editor.exit_editor", player) to player
+		remove bossbar "edit_inventory_%player%"
+
+On command:
+	command is "inv" or "inventory"
+	set {_game} to {host-player::%player%}
+	{_game} is set
+	cancel event
+	if arguments is set:
+		if arguments is "-back":
+			if {host::%{_game}%::host} is not player:
+				send string("uhc.error.syntax", player, "syntax;/inv")
+				stop
+			else:
+				set {_back} to true
+		else:
+			send string("uhc.error.syntax", player, "syntax;/inv")
+			stop
+	if {_back} is not set:
+		set {_close} to barrier named string("uhc.gui.close", player)
+	else:
+		set {_close} to arrow named string("uhc.gui.back.name", player)
+		set {_gui} to string("uhc.gui.category_name.inventory", player)
+		set lore of {_close} to colored strings("uhc.gui.back.lore", player, "gui;%{_gui}%")
+	set {inv::%player%} to "inventory_%{_game}%"
+	open chest inventory with 6 rows named string("uhc.gui.start_inventory", player) to player
+	set slot 0 of open inventory of player to {host::%{_game}%::inv::helmet}
+	set slot 1 of open inventory of player to {host::%{_game}%::inv::chestplate}
+	set slot 2 of open inventory of player to {host::%{_game}%::inv::leggings}
+	set slot 3 of open inventory of player to {host::%{_game}%::inv::boots}
+	set slot 8 of open inventory of player to {_close}
+	set slot integers between 4 and 7 of open inventory of player to dark gray stained glass pane named "&r"
+	set slot integers between 9 and 17 of open inventory of player to dark gray stained glass pane named "&r"
+	set slot integers between 9 and 17 of open inventory of player to dark gray stained glass pane named "&r"
+	set {_slot} to 18
+	set {_index} to 9
+	loop 27 times:
+		set slot {_slot} of open inventory of player to {host::%{_game}%::inv::slots::%{_index}%}
+		add 1 to {_slot} and {_index}
+	set {_index} to 0
+	loop 9 times:
+		set slot {_slot} of open inventory of player to {host::%{_game}%::inv::slots::%{_index}%}
+		add 1 to {_slot} and {_index}
+
+On inventory click:
+	set {_game} to {host-player::%player%}
+	{inv::%player%} is "inventory_%{_game}%"
+	cancel event
+	event-clicktype is not left mouse button with shift or right mouse button with shift
+	if event-slot is 8:
+		close player's inventory
+		event-slot is arrow
+		uhcHostOpen(player, "inventory")
+
+Function uhcExportConfig(p: player, id: string):
+	set {_game} to {host-player::%{_p}%}
+
+	add {_id} to {host-player::%{_p}%::config::*}
+	set {host-player::%{_p}%::c::%{_id}%::config::name} to {inv-data::%{_p}%::name}
+	set {host-player::%{_p}%::c::%{_id}%::config::icon} to {inv-data::%{_p}%::icon}
+
+	set {host-player::%{_p}%::c::%{_id}%::name} to {host::%{_game}%::name}
+	set {host-player::%{_p}%::c::%{_id}%::slots} to {host::%{_game}%::slots}
+	set {host-player::%{_p}%::c::%{_id}%::team} to {host::%{_game}%::team}
+
+	set {host-player::%{_p}%::c::%{_id}%::game::spec} to {host::%{_game}%::game::spec}
+	set {host-player::%{_p}%::c::%{_id}%::game::cycle} to {host::%{_game}%::game::cycle}
+	set {host-player::%{_p}%::c::%{_id}%::game::pvp} to {host::%{_game}%::game::pvp}
+	set {host-player::%{_p}%::c::%{_id}%::game::bTime} to {host::%{_game}%::game::bTime}
+	set {host-player::%{_p}%::c::%{_id}%::game::bSpeed} to {host::%{_game}%::game::bSpeed}
+	set {host-player::%{_p}%::c::%{_id}%::game::bStart} to {host::%{_game}%::game::bStart}
+	set {host-player::%{_p}%::c::%{_id}%::game::bEnd} to {host::%{_game}%::game::bEnd}
+
+	set {host-player::%{_p}%::c::%{_id}%::inv::helmet} to {host::%{_game}%::inv::helmet}
+	set {host-player::%{_p}%::c::%{_id}%::inv::chestplate} to {host::%{_game}%::inv::chestplate}
+	set {host-player::%{_p}%::c::%{_id}%::inv::leggings} to {host::%{_game}%::inv::leggings}
+	set {host-player::%{_p}%::c::%{_id}%::inv::boots} to {host::%{_game}%::inv::boots}
+	set {_slot} to 0
+	loop 36 times:
+		set {host-player::%{_p}%::c::%{_id}%::inv::slots::%{_slot}%} to {host::%{_game}%::inv::slots::%{_slot}%}
+		add 1 to {_slot}
+	clear {inv-data::%{_p}%::*}
+
+
+Function uhcImportConfig(p: player, id: string):
+	set {_game} to {host-player::%{_p}%}
+
+	set {host::%{_game}%::name} to {host-player::%{_p}%::c::%{_id}%::name}
+	set {host::%{_game}%::slots} to {host-player::%{_p}%::c::%{_id}%::slots}
+	set {host::%{_game}%::team} to {host-player::%{_p}%::c::%{_id}%::team}
+
+	set {host::%{_game}%::game::spec} to {host-player::%{_p}%::c::%{_id}%::game::spec}
+	set {host::%{_game}%::game::cycle} to {host-player::%{_p}%::c::%{_id}%::game::cycle}
+	set {host::%{_game}%::game::pvp} to {host-player::%{_p}%::c::%{_id}%::game::pvp}
+	set {host::%{_game}%::game::bTime} to {host-player::%{_p}%::c::%{_id}%::game::bTime}
+	set {host::%{_game}%::game::bSpeed} to {host-player::%{_p}%::c::%{_id}%::game::bSpeed}
+	set {host::%{_game}%::game::bStart} to {host-player::%{_p}%::c::%{_id}%::game::bStart}
+	set {host::%{_game}%::game::bEnd} to {host-player::%{_p}%::c::%{_id}%::game::bEnd}
+
+	set {host-player::%{_p}%::c::%{_id}%::inv::helmet} to {host::%{_game}%::inv::helmet}
+	set {host-player::%{_p}%::c::%{_id}%::inv::chestplate} to {host::%{_game}%::inv::chestplate}
+	set {host-player::%{_p}%::c::%{_id}%::inv::leggings} to {host::%{_game}%::inv::leggings}
+	set {host-player::%{_p}%::c::%{_id}%::inv::boots} to {host::%{_game}%::inv::boots}
+	set {_slot} to 0
+	loop 36 times:
+		set {host-player::%{_p}%::c::%{_id}%::inv::slots::%{_slot}%} to {host::%{_game}%::inv::slots::%{_slot}%}
+		add 1 to {_slot}
+
+	uhcTeamCheck({_game})
+	uhcScoreWaitingUpdate({host::%{_game}%::p::*})

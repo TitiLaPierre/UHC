@@ -1,0 +1,101 @@
+Function openUhcList(p: player, page: integer=0):
+	set {inv::%{_p}%} to "uhclist"
+	set {inv::%{_p}%::page} to {_page}
+	open chest inventory with 6 rows named string("uhc.gui.join_game.name", {_p}) to {_p}
+	set slot 0 and 1 and 2 and 3 and 4 and 5 and 6 and 7 and 8 and 9 and 17 and 18 and 26 and 27 and 35 and 36 and 44 and 45 and 46 and 47 and 48 and 50 and 51 and 52 and 53 of open inventory of {_p} to blue stained glass pane named "&r"
+	#
+	set slot 49 of open inventory of {_p} to barrier named string("uhc.gui.close", {_p})
+	#
+	updateUhcList({_p}, {_page})
+
+Function updateUhcList(p: player, page: integer=0):
+	set {_guiId} to now
+	set {inv-data::%{_p}%::guiId} to {_guiId}
+	set {_back} to an arrow named string("uhc.gui.back.page_previous", {_p})
+	set {_next} to an arrow named string("uhc.gui.back.page_next", {_p})
+	add all integers between 10 and 16 to {_slots::*}
+	add all integers between 19 and 25 to {_slots::*}
+	add all integers between 28 and 34 to {_slots::*}
+	add all integers between 37 and 43 to {_slots::*}
+	while {inv-data::%{_p}%::guiId} is {_guiId}:
+		clear {inv::%{_p}%::slot::*}
+		clear {inv::%{_p}%::page::*}
+		clear slot {_slots::*} of open inventory of {_p}
+		if size of {host-list::*} is 0:
+			set {_noGame} to cobweb named string("uhc.gui.join_game.no_game.name", {_p})
+			set lore of {_noGame} to colored strings("uhc.gui.join_game.no_game.lore", {_p})
+			set slot 22 of open inventory of {_p} to {_noGame}
+		else:
+			while {_stop} is not true:
+				set {_index} to 28*{_page}
+				set {_calcBack} to {_index}-1
+				if element {_calcBack} of {host-list::*} is set:
+					{_calcBack} > 0
+					set {inv::%{_p}%::page::back} to true
+					set slot 45 of open inventory of {_p} to {_back}
+				loop 28 times:
+					add 1 to {_index}
+					add element {_index} of {host-list::*} to {_return::*}
+				set {_calcNext} to {_index}+1
+				if element {_calcNext} of {host-list::*} is set:
+					set {inv::%{_p}%::page::next} to true
+					set slot 53 of open inventory of {_p} to {_next}
+				#
+				if {_page} <= 0:
+					set {_stop} to true
+				else if {_return::*} is set:
+					set {_stop} to true
+				else:
+					remove 1 from {_page}
+			clear {_stop}
+			set {_index} to 1
+			set {_i} to 0
+			loop 28 times:
+				add 1 to {_i}
+				set {_slot} to {_slots::%{_index}%}
+				if element {_i} of {_return::*} is not set:
+					set {_item} to light blue stained glass pane named "&r"
+				else:
+					set {_value} to element {_i} of {_return::*}
+					set {_name} to uncolored {host::%{_value}%::name}
+					set {_state} to string("uhc.gui.join_game.state.%{host::%{_value}%::state}%", {_p})
+					set {_teams} to string("uhc.gui.join_game.teams.%{host::%{_value}%::team}%", {_p})
+					set {_scenariosList::*} to {host::%{_value}%::scenarios::*}
+					loop {_scenariosList::*}:
+						if size of {_scenarios::*} < 3:
+							remove loop-value-2 from {_scenariosList::*}
+							set {_scenarioName} to string("scenarios.%loop-value-2%.name", {_p})
+							add "&7- %{_scenarioName}%" to {_scenarios::*}
+						else if size of {_scenarios::*} is 3:
+							add string("uhc.gui.join_game.and_more", {_p}, "amount;%size of {_scenariosList::*}%") to {_scenarios::*}
+					if {_scenarios::*} is set:
+						set {_scenarios} to join {_scenarios::*} by nl
+					else:
+						set {_scenarios} to string("uhc.gui.join_game.no_scenarios", {_p})
+					if uhcIsJoinableAsPlayer({_p}, {_value}) is not set:
+						set {_item} to lime terracotta
+					else:
+						set {_item} to red terracotta
+					set name of {_item} to string("uhc.gui.join_game.format.name", {_p}, "name;%{_name}%")
+					set lore of {_item} to colored strings("uhc.gui.join_game.format.lore", {_p}, ("gameid;%{_value}%", "host;%{host::%{_value}%::host}%", "state;%{_state}%", "teams;%{_teams}%", "players;%size of {host::%{_value}%::p::*}%", "slots;%{host::%{_value}%::slots}%", "scenarios;%{_scenarios}%"))
+					if uhcIsJoinableAsPlayer({_p}, {_value}) is set:
+						clear last element of lore of {_item}
+						clear last element of lore of {_item}
+					else:
+						set {inv::%{_p}%::slot::%{_slot}%} to {_value}
+					clear {_scenarios::*}
+				set slot {_slot} of open inventory of {_p} to {_item}
+				add 1 to {_index}
+			clear {_return::*}
+		wait a second
+
+On inventory click:
+	{inv::%player%} is "uhclist"
+	cancel event
+	event-clicktype is not left mouse button with shift or right mouse button with shift
+	if event-slot is 49:
+		close player's inventory
+	else:
+		set {_id} to {inv::%player%::slot::%index of event-slot%}
+		{_id} is set
+		uhcJoin(player, {_id})

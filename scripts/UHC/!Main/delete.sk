@@ -1,0 +1,15 @@
+Function uhcDelete(game: text, slient: boolean=false):
+	loop {host::%{_game}%::p::*}:
+		uhcLeave(loop-value)
+	set {_host} to {host::%{_game}%::host}
+	remove {_game} from {host-player::%{_host}%::game::*}
+	remove {_game} from {host-list::*}
+	clear {host::%{_game}%::*}
+	clear {chunk::%{_game}%::*}
+	clear {structures::%{_game}%::*}
+	unload world({_game})
+	while world({_game}) is loaded:
+		wait 1 second
+	delete directory {_game}
+	{_silent} is false
+	send string("uhc.game_management.game_deleted", {_host}, "game;%{_game}%") to {_host}

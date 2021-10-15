@@ -1,0 +1,23 @@
+Command /name <text>:
+	trigger:
+		set {_name} to arg 1
+		replace all "[-]" in {_name} with "➥"
+		replace all "[v]" in {_name} with "✔"
+		replace all "[x]" in {_name} with "✘"
+		replace all "[.]" in {_name} with "•"
+		replace all "[+]" in {_name} with "✚"
+		set name of player's tool to colored {_name}
+
+Command /lore [<string>]:
+	trigger:
+		if arg 1 is not set:
+			clear lore of player's tool
+			stop
+		set {_lore::*} to arg 1 split at """"
+		loop {_lore::*}:
+			replace all "[-]" in {_lore::%loop-index%} with "➥"
+			replace all "[v]" in {_lore::%loop-index%} with "✔"
+			replace all "[x]" in {_lore::%loop-index%} with "✘"
+			replace all "[.]" in {_lore::%loop-index%} with "•"
+			replace all "[+]" in {_lore::%loop-index%} with "✚"
+		set lore of player's tool to colored {_lore::*}

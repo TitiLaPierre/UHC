@@ -1,0 +1,100 @@
+Import:
+	org.bukkit.WorldCreator
+
+Function uhcCreate(host: player):
+	# Variables
+	#----------
+	set {_state} to 1
+	add 1 to {uhc-host}
+	set {_game} to join "UHCHOST-" and "%{uhc-host}%"
+	send string("uhc.game_management.create_start", {_host}, "game;%{_game}%") to {_host}
+	wait 1 second
+	set {host::%{_game}%::name} to "&6&lUHC Host"
+	set {host::%{_game}%::type} to "uhc"
+	#
+	set {host::%{_game}%::host} to {_host}
+	set {host::%{_game}%::state} to "loading"
+	set {host::%{_game}%::whitelist} to "private"
+	#
+	set {host::%{_game}%::team} to 1
+	set {host::%{_game}%::slots} to 30
+	#
+	set {host::%{_game}%::game::spec} to "all"
+	set {host::%{_game}%::game::cycle} to "dn"
+	set {host::%{_game}%::game::pvp} to 1200
+	set {host::%{_game}%::game::bTime} to 3600
+	set {host::%{_game}%::game::bSpeed} to 1.5
+	set {host::%{_game}%::game::bStart} to 1000
+	set {host::%{_game}%::game::bEnd} to 150
+	#
+	set {host::%{_game}%::game::pLong} to true
+	set {host::%{_game}%::game::pLevel} to true
+	add {host-config::potion::category::base::*} to {host::%{_game}%::game::potions::base::*}
+	uhcPotionsCheck({_game})
+	#
+	add {_host} to {host::%{_game}%::wl::*}
+	#
+	add {_game} to {host-player::%{_host}%::game::*}
+	add {_game} to {host-list::*}
+	uhcTeamCheck({_game})
+	send string("uhc.game_management.create_state", {_host}, "state;%{_state}%") to {_host}
+	add 1 to {_state}
+
+	# World creation
+	#---------------
+	create new section stored in {_section}:
+		try new WorldCreator({_game}).seed(492290607157239411).createWorld()
+	run section {_section} async and wait
+	set {_world} to world({_game})
+	set {host::%{_game}%::world} to {_world}
+	send string("uhc.game_management.create_state", {_host}, "state;%{_state}%") to {_host}
+	add 1 to {_state}
+
+	# Chunk loading
+	#--------------
+	add chunk -1, -1 in {_world} to {chunk::%{_game}%::*}
+	add chunk -1, 0 in {_world} to {chunk::%{_game}%::*}
+	add chunk -1, 1 in {_world} to {chunk::%{_game}%::*}
+	#
+	add chunk 0, -1 in {_world} to {chunk::%{_game}%::*}
+	add chunk 0, 0 in {_world} to {chunk::%{_game}%::*}
+	add chunk 0, 1 in {_world} to {chunk::%{_game}%::*}
+	#
+	add chunk 1, -1 in {_world} to {chunk::%{_game}%::*}
+	add chunk 1, 0 in {_world} to {chunk::%{_game}%::*}
+	add chunk 1, 1 in {_world} to {chunk::%{_game}%::*}
+	#
+	loop {chunk::%{_game}%::*}:
+		load chunk loop-value
+	send string("uhc.game_management.create_state", {_host}, "state;%{_state}%") to {_host}
+	add 1 to {_state}
+
+	# Create platform
+	#----------------
+	plateform(join {_game} and "lobby" by "-", location(0, 200, 0, {_world}), 19, 4)
+	send string("uhc.game_management.create_state", {_host}, "state;%{_state}%") to {_host}
+	add 1 to {_state}
+
+	# World Rules
+	#------------
+	set value of gamerule "doMobSpawning" in {_world} to "false"
+	set value of gamerule "doMobLooting" in {_world} to "false"
+	set value of gamerule "doWeatherCycle" in {_world} to "false"
+	set value of gamerule "doDaylightCycle" in {_world} to "false"
+	set value of gamerule "naturalRegeneration" in {_world} to "false"
+	set value of gamerule "spectatorGenerateChunk" in {_world} to "false"
+	set value of gamerule "announceAdvancements" in {_world} to "false"
+	set weather in {_world} to clear
+	set time in {_world} to 12:00
+	send string("uhc.game_management.create_state", {_host}, "state;%{_state}%") to {_host}
+
+	# Game created
+	#-------------
+	send string("uhc.game_management.create_end", {_host}) to {_host}
+	set {host::%{_game}%::state} to "waiting"
+	uhcJoin({_host}, {_game})
+	clear {host-player::%{_host}%::create}
+
+on block physics:
+	block is snow layer
+	cancel event

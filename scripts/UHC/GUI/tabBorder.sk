@@ -1,0 +1,495 @@
+Options:
+	sound-error: entity.villager.no
+	sound-success: block.note.pling
+	sound-click: ui.button.click
+
+Function uhcHostTabBorder(p: player):
+	set {_game} to {host-player::%{_p}%}
+
+	#
+	#     >  Time
+	#
+
+	set {_time} to a clock named string("uhc.gui.border.time.name", {_p})
+	if {host::%{_game}%::game::bTime} < 1:
+		set {_borderTime} to string("uhc.gui.on_start", {_p})
+	else:
+		set {_} to time("%{host::%{_game}%::game::bTime}% seconds" parsed as timespan)
+		set {_borderTime} to "%{_}%"
+	set lore of {_time} to colored strings("uhc.gui.border.time.lore", {_p}, "time;%{_borderTime}%")
+
+	#
+	#     >  Speed
+	#
+
+	set {_speed} to feather named string("uhc.gui.border.speed.name", {_p})
+	set {_bSpeed} to {host::%{_game}%::game::bSpeed}
+	set {_bps} to string("uhc.gui.border.speed.speed", {_p})
+	set {_borderSpeed} to "%{_bSpeed}% %{_bps}%"
+	set lore of {_speed} to colored strings("uhc.gui.border.speed.lore", {_p}, "speed;%{_borderSpeed}%")
+
+	#
+	#     >  Start
+	#
+
+	set {_start} to green stained glass named string("uhc.gui.border.start.name", {_p})
+	set lore of {_start} to colored strings("uhc.gui.border.start.lore", {_p}, "size;%{host::%{_game}%::game::bStart}%")
+
+	#
+	#     >  End
+	#
+
+	set {_end} to red stained glass named string("uhc.gui.border.end.name", {_p})
+	set lore of {_end} to colored strings("uhc.gui.border.end.lore", {_p}, "size;%{host::%{_game}%::game::bEnd}%")
+
+	#
+	#     >  GUI
+	#
+
+	set slot 20 of open inventory of {_p} to {_time}
+	set slot 21 of open inventory of {_p} to {_speed}
+
+	set slot 23 of open inventory of {_p} to {_start}
+	set slot 24 of open inventory of {_p} to {_end}
+
+	set {cooldown::%{_p}%} to true
+	wait 0.1 second
+	clear {cooldown::%{_p}%}
+
+On inventory click:
+	event-inventory is not player's inventory
+	set {_game} to {host-player::%player%}
+	{inv::%player%} is "setup_border_%{_game}%"
+	event-clicktype is not left mouse button with shift or right mouse button with shift
+	{cooldown::%player%} is not set
+	set {cooldown::%player%} to true
+	if event-slot is 20:
+		wait a tick
+		play sound "{@sound-click}" with volume 0.8 and pitch 1 at player for player
+		uhcHostUpdate(player, "btime")
+	else if event-slot is 21:
+		wait a tick
+		play sound "{@sound-click}" with volume 0.8 and pitch 1 at player for player
+		uhcHostUpdate(player, "bspeed")
+	else if event-slot is 23:
+		wait a tick
+		play sound "{@sound-click}" with volume 0.8 and pitch 1 at player for player
+		uhcHostUpdate(player, "bstart")
+	else if event-slot is 24:
+		wait a tick
+		play sound "{@sound-click}" with volume 0.8 and pitch 1 at player for player
+		uhcHostUpdate(player, "bend")
+	wait 0.1 second
+	clear {cooldown::%player%}
+
+Function uhcHostTabBTime(p: player):
+	set {inv::%{_p}%::back} to "border"
+	set {_game} to {host-player::%{_p}%}
+
+	#
+	#     >  Remove
+	#
+
+	if {host::%{_game}%::game::bTime} - 600 >= 0:
+		set {_removeTenMinutes} to red stained glass pane named string("uhc.gui.border.time.remove10min", {_p})
+	if {host::%{_game}%::game::bTime} - 60 >= 0:
+		set {_removeOneMinute} to orange stained glass pane named string("uhc.gui.border.time.remove1min", {_p})
+	if {host::%{_game}%::game::bTime} - 30 >= 0:
+		set {_removeThirtySeconds} to yellow stained glass pane named string("uhc.gui.border.time.remove30s", {_p})
+
+	#
+	#     >  Time
+	#
+
+	set {_time} to a clock named string("uhc.gui.border.time.name", {_p})
+	if {host::%{_game}%::game::bTime} < 1:
+		set {_borderTime} to string("uhc.gui.on_start", {_p})
+	else:
+		set {_} to time("%{host::%{_game}%::game::bTime}% seconds" parsed as timespan)
+		set {_borderTime} to "%{_}%"
+	set lore of {_time} to colored strings("uhc.gui.border.time.lore", {_p}, "time;%{_borderTime}%")
+	set line 1 of lore of {_time} to string("uhc.gui.type.modifier", {_p})
+	clear last element of lore of {_time}
+	if {host::%{_game}%::game::bTime} is not 3600:
+		add colored string("uhc.gui.click_type.drop_reset", {_p}) to lore of {_time}
+	else:
+		clear last element of lore of {_time}
+
+	#
+	#     >  Add
+	#
+
+	if {host::%{_game}%::game::bTime} + 30 <= 7200:
+		set {_addThirtySeconds} to lime stained glass pane named string("uhc.gui.border.time.add30s", {_p})
+	if {host::%{_game}%::game::bTime} + 60 <= 7200:
+		set {_addOneMinute} to green stained glass pane named string("uhc.gui.border.time.add1min", {_p})
+	if {host::%{_game}%::game::bTime} + 600 <= 7200:
+		set {_addTenMinutes} to light blue stained glass pane named string("uhc.gui.border.time.add10min", {_p})
+
+	#
+	#     >  GUI
+	#
+
+	set slot 19 of open inventory of {_p} to {_removeTenMinutes}
+	set slot 20 of open inventory of {_p} to {_removeOneMinute}
+	set slot 21 of open inventory of {_p} to {_removeThirtySeconds}
+
+	set slot 22 of open inventory of {_p} to {_time}
+
+	set slot 23 of open inventory of {_p} to {_addThirtySeconds}
+	set slot 24 of open inventory of {_p} to {_addOneMinute}
+	set slot 25 of open inventory of {_p} to {_addTenMinutes}
+
+	set {cooldown::%{_p}%} to true
+	wait 0.1 second
+	clear {cooldown::%{_p}%}
+
+On inventory click:
+	event-inventory is not player's inventory
+	set {_game} to {host-player::%player%}
+	{inv::%player%} is "setup_btime_%{_game}%"
+	event-clicktype is not left mouse button with shift or right mouse button with shift
+	{cooldown::%player%} is not set
+	set {cooldown::%player%} to true
+	if event-slot is 19:
+		{host::%{_game}%::game::bTime} - 600 >= 0
+		remove 600 from {host::%{_game}%::game::bTime}
+		uhcHostUpdate(player, "bTime")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 20:
+		{host::%{_game}%::game::bTime} - 60 >= 0
+		remove 60 from {host::%{_game}%::game::bTime}
+		uhcHostUpdate(player, "bTime")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 21:
+		{host::%{_game}%::game::bTime} - 30 >= 0
+		remove 30 from {host::%{_game}%::game::bTime}
+		uhcHostUpdate(player, "bTime")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	#
+	else if event-slot is 22:
+		{host::%{_game}%::game::bTime} is not 3600
+		event-clicktype is drop key
+		set {host::%{_game}%::game::bTime} to 3600
+		uhcHostUpdate(player, "bTime")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	#
+	else if event-slot is 23:
+		{host::%{_game}%::game::bTime} + 30 <= 7200
+		add 30 to {host::%{_game}%::game::bTime}
+		uhcHostUpdate(player, "bTime")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 24:
+		{host::%{_game}%::game::bTime} + 60 <= 7200
+		add 60 to {host::%{_game}%::game::bTime}
+		uhcHostUpdate(player, "bTime")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 25:
+		{host::%{_game}%::game::bTime} + 600 <= 7200
+		add 600 to {host::%{_game}%::game::bTime}
+		uhcHostUpdate(player, "bTime")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	wait 0.1 second
+	clear {cooldown::%player%}
+
+Function uhcHostTabBSpeed(p: player):
+	set {inv::%{_p}%::back} to "border"
+	set {_game} to {host-player::%{_p}%}
+
+	#
+	#     >  Remove
+	#
+
+	if {host::%{_game}%::game::bSpeed} - 1 >= 0.5:
+		set {_removeOneBlock} to orange stained glass pane named string("uhc.gui.border.speed.remove1block", {_p})
+	if {host::%{_game}%::game::bSpeed} - 0.5 >= 0.5:
+		set {_removeHalfBlock} to yellow stained glass pane named string("uhc.gui.border.speed.removeHalfBlock", {_p})
+
+	#
+	#     >  Speed
+	#
+
+	set {_speed} to feather named string("uhc.gui.border.speed.name", {_p})
+	set {_bSpeed} to {host::%{_game}%::game::bSpeed}
+	set {_bps} to string("uhc.gui.border.speed.speed", {_p})
+	set {_borderSpeed} to "%{_bSpeed}% %{_bps}%"
+	set lore of {_speed} to colored strings("uhc.gui.border.speed.lore", {_p}, "speed;%{_borderSpeed}%")
+	set line 1 of lore of {_speed} to string("uhc.gui.type.modifier", {_p})
+	clear last element of lore of {_speed}
+	if {host::%{_game}%::game::bSpeed} is not 1.5:
+		add colored string("uhc.gui.click_type.drop_reset", {_p}) to lore of {_speed}
+	else:
+		clear last element of lore of {_speed}
+
+	#
+	#     >  Add
+	#
+
+	if {host::%{_game}%::game::bSpeed} + 0.5 <= 7.5:
+		set {_addHalfBlock} to lime stained glass pane named string("uhc.gui.border.speed.addHalfBlock", {_p})
+	if {host::%{_game}%::game::bSpeed} + 1 <= 7.5:
+		set {_addOneBlock} to green stained glass pane named string("uhc.gui.border.speed.add1block", {_p})
+
+	#
+	#     >  GUI
+	#
+
+	set slot 20 of open inventory of {_p} to {_removeOneBlock}
+	set slot 21 of open inventory of {_p} to {_removeHalfBlock}
+
+	set slot 22 of open inventory of {_p} to {_speed}
+
+	set slot 23 of open inventory of {_p} to {_addHalfBlock}
+	set slot 24 of open inventory of {_p} to {_addOneBlock}
+
+	set {cooldown::%{_p}%} to true
+	wait 0.1 second
+	clear {cooldown::%{_p}%}
+
+On inventory click:
+	event-inventory is not player's inventory
+	set {_game} to {host-player::%player%}
+	{inv::%player%} is "setup_bspeed_%{_game}%"
+	event-clicktype is not left mouse button with shift or right mouse button with shift
+	{cooldown::%player%} is not set
+	set {cooldown::%player%} to true
+	if event-slot is 20:
+		{host::%{_game}%::game::bSpeed} - 1 >= 0.5
+		remove 1 from {host::%{_game}%::game::bSpeed}
+		uhcHostUpdate(player, "bSpeed")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 21:
+		{host::%{_game}%::game::bSpeed} - 0.5 >= 0.5
+		remove 0.5 from {host::%{_game}%::game::bSpeed}
+		uhcHostUpdate(player, "bSpeed")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	#
+	else if event-slot is 22:
+		{host::%{_game}%::game::bSpeed} is not 1.5
+		event-clicktype is drop key
+		set {host::%{_game}%::game::bSpeed} to 1.5
+		uhcHostUpdate(player, "bSpeed")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	#
+	else if event-slot is 23:
+		{host::%{_game}%::game::bSpeed} + 0.5 <= 7.5
+		add 0.5 to {host::%{_game}%::game::bSpeed}
+		uhcHostUpdate(player, "bSpeed")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 24:
+		{host::%{_game}%::game::bSpeed} + 1 <= 7.5
+		add 1 to {host::%{_game}%::game::bSpeed}
+		uhcHostUpdate(player, "bSpeed")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	wait 0.1 second
+	clear {cooldown::%player%}
+
+Function uhcHostTabBStart(p: player):
+	set {inv::%{_p}%::back} to "border"
+	set {_game} to {host-player::%{_p}%}
+
+	#
+	#     >  Remove
+	#
+
+	if {host::%{_game}%::game::bStart} - 100 >= 600:
+		set {_removeOneHundredBlocs} to red stained glass pane named string("uhc.gui.border.remove100blocks", {_p})
+	if {host::%{_game}%::game::bStart} - 50 >= 600:
+		set {_removeFiftyBlocs} to orange stained glass pane named string("uhc.gui.border.remove50blocks", {_p})
+	if {host::%{_game}%::game::bStart} - 10 >= 600:
+		set {_removeTenBlocs} to yellow stained glass pane named string("uhc.gui.border.remove10blocks", {_p})
+
+	#
+	#     >  Start
+	#
+
+	set {_start} to green stained glass named string("uhc.gui.border.start.name", {_p})
+	set lore of {_start} to colored strings("uhc.gui.border.start.lore", {_p}, "size;%{host::%{_game}%::game::bStart}%")
+	set line 1 of lore of {_start} to string("uhc.gui.type.modifier", {_p})
+	clear last element of lore of {_start}
+	if {host::%{_game}%::game::bStart} is not 1000:
+		add colored string("uhc.gui.click_type.drop_reset", {_p}) to lore of {_start}
+	else:
+		clear last element of lore of {_start}
+
+	#
+	#     >  Add
+	#
+
+	if {host::%{_game}%::game::bStart} + 10 <= 2000:
+		set {_addTenBlocs} to lime stained glass pane named string("uhc.gui.border.add10blocks", {_p})
+	if {host::%{_game}%::game::bStart} + 50 <= 2000:
+		set {_addFiftyBlocs} to green stained glass pane named string("uhc.gui.border.add50blocks", {_p})
+	if {host::%{_game}%::game::bStart} + 100 <= 2000:
+		set {_addOneHundredBlocs} to light blue stained glass pane named string("uhc.gui.border.add100blocks", {_p})
+
+	#
+	#     >  GUI
+	#
+
+	set slot 19 of open inventory of {_p} to {_removeOneHundredBlocs}
+	set slot 20 of open inventory of {_p} to {_removeFiftyBlocs}
+	set slot 21 of open inventory of {_p} to {_removeTenBlocs}
+
+	set slot 22 of open inventory of {_p} to {_start}
+
+	set slot 23 of open inventory of {_p} to {_addTenBlocs}
+	set slot 24 of open inventory of {_p} to {_addFiftyBlocs}
+	set slot 25 of open inventory of {_p} to {_addOneHundredBlocs}
+
+	set {cooldown::%{_p}%} to true
+	wait 0.1 second
+	clear {cooldown::%{_p}%}
+
+On inventory click:
+	event-inventory is not player's inventory
+	set {_game} to {host-player::%player%}
+	{inv::%player%} is "setup_bstart_%{_game}%"
+	event-clicktype is not left mouse button with shift or right mouse button with shift
+	{cooldown::%player%} is not set
+	set {cooldown::%player%} to true
+	if event-slot is 19:
+		{host::%{_game}%::game::bStart} - 100 >= 600
+		remove 100 from {host::%{_game}%::game::bStart}
+		uhcHostUpdate(player, "bStart")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 20:
+		{host::%{_game}%::game::bStart} - 50 >= 600
+		remove 50 from {host::%{_game}%::game::bStart}
+		uhcHostUpdate(player, "bStart")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 21:
+		{host::%{_game}%::game::bStart} - 10 >= 600
+		remove 10 from {host::%{_game}%::game::bStart}
+		uhcHostUpdate(player, "bStart")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	#
+	else if event-slot is 22:
+		{host::%{_game}%::game::bStart} is not 1000
+		event-clicktype is drop key
+		set {host::%{_game}%::game::bStart} to 1000
+		uhcHostUpdate(player, "bStart")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	#
+	else if event-slot is 23:
+		{host::%{_game}%::game::bStart} + 10 <= 2000
+		add 10 to {host::%{_game}%::game::bStart}
+		uhcHostUpdate(player, "bStart")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 24:
+		{host::%{_game}%::game::bStart} + 50 <= 2000
+		add 50 to {host::%{_game}%::game::bStart}
+		uhcHostUpdate(player, "bStart")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 25:
+		{host::%{_game}%::game::bStart} + 100 <= 2000
+		add 100 to {host::%{_game}%::game::bStart}
+		uhcHostUpdate(player, "bStart")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	wait 0.1 second
+	clear {cooldown::%player%}
+
+Function uhcHostTabBEnd(p: player):
+	set {inv::%{_p}%::back} to "border"
+	set {_game} to {host-player::%{_p}%}
+
+	#
+	#     >  Remove
+	#
+
+	if {host::%{_game}%::game::bEnd} - 100 >= 50:
+		set {_removeOneHundredBlocs} to red stained glass pane named string("uhc.gui.border.remove100blocks", {_p})
+	if {host::%{_game}%::game::bEnd} - 50 >= 50:
+		set {_removeFiftyBlocs} to orange stained glass pane named string("uhc.gui.border.remove50blocks", {_p})
+	if {host::%{_game}%::game::bEnd} - 10 >= 50:
+		set {_removeTenBlocs} to yellow stained glass pane named string("uhc.gui.border.remove10blocks", {_p})
+
+	#
+	#     >  End
+	#
+
+	set {_end} to red stained glass named string("uhc.gui.border.end.name", {_p})
+	set lore of {_end} to colored strings("uhc.gui.border.end.lore", {_p}, "size;%{host::%{_game}%::game::bEnd}%")
+	set line 1 of lore of {_end} to string("uhc.gui.type.modifier", {_p})
+	clear last element of lore of {_end}
+	if {host::%{_game}%::game::bEnd} is not 150:
+		add colored string("uhc.gui.click_type.drop_reset", {_p}) to lore of {_end}
+	else:
+		clear last element of lore of {_end}
+
+	#
+	#     >  Add
+	#
+
+	if {host::%{_game}%::game::bEnd} + 10 <= 250:
+		set {_addTenBlocs} to lime stained glass pane named string("uhc.gui.border.add10blocks", {_p})
+	if {host::%{_game}%::game::bEnd} + 50 <= 250:
+		set {_addFiftyBlocs} to green stained glass pane named string("uhc.gui.border.add50blocks", {_p})
+	if {host::%{_game}%::game::bEnd} + 100 <= 250:
+		set {_addOneHundredBlocs} to light blue stained glass pane named string("uhc.gui.border.add100blocks", {_p})
+
+	#
+	#     >  GUI
+	#
+
+	set slot 19 of open inventory of {_p} to {_removeOneHundredBlocs}
+	set slot 20 of open inventory of {_p} to {_removeFiftyBlocs}
+	set slot 21 of open inventory of {_p} to {_removeTenBlocs}
+
+	set slot 22 of open inventory of {_p} to {_end}
+
+	set slot 23 of open inventory of {_p} to {_addTenBlocs}
+	set slot 24 of open inventory of {_p} to {_addFiftyBlocs}
+	set slot 25 of open inventory of {_p} to {_addOneHundredBlocs}
+
+	set {cooldown::%{_p}%} to true
+	wait 0.1 second
+	clear {cooldown::%{_p}%}
+
+On inventory click:
+	event-inventory is not player's inventory
+	set {_game} to {host-player::%player%}
+	{inv::%player%} is "setup_bend_%{_game}%"
+	event-clicktype is not left mouse button with shift or right mouse button with shift
+	{cooldown::%player%} is not set
+	set {cooldown::%player%} to true
+	if event-slot is 19:
+		{host::%{_game}%::game::bEnd} - 100 >= 50
+		remove 100 from {host::%{_game}%::game::bEnd}
+		uhcHostUpdate(player, "bEnd")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 20:
+		{host::%{_game}%::game::bEnd} - 50 >= 50
+		remove 50 from {host::%{_game}%::game::bEnd}
+		uhcHostUpdate(player, "bEnd")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 21:
+		{host::%{_game}%::game::bEnd} - 10 >= 50
+		remove 10 from {host::%{_game}%::game::bEnd}
+		uhcHostUpdate(player, "bEnd")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	#
+	else if event-slot is 22:
+		{host::%{_game}%::game::bEnd} is not 150
+		event-clicktype is drop key
+		set {host::%{_game}%::game::bEnd} to 150
+		uhcHostUpdate(player, "bEnd")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	#
+	else if event-slot is 23:
+		{host::%{_game}%::game::bEnd} + 10 <= 250
+		add 10 to {host::%{_game}%::game::bEnd}
+		uhcHostUpdate(player, "bEnd")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 24:
+		{host::%{_game}%::game::bEnd} + 50 <= 250
+		add 50 to {host::%{_game}%::game::bEnd}
+		uhcHostUpdate(player, "bEnd")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	else if event-slot is 25:
+		{host::%{_game}%::game::bEnd} + 100 <= 250
+		add 100 to {host::%{_game}%::game::bEnd}
+		uhcHostUpdate(player, "bEnd")
+		play sound "{@sound-success}" with volume 0.8 and pitch 1 at player for player
+	wait 0.1 second
+	clear {cooldown::%player%}

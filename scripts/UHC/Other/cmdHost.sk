@@ -1,0 +1,173 @@
+Options:
+	error: &c
+
+Command /host [<text>] [<text>] [<text>]:
+	aliases: h
+	trigger:
+		if {host-player::%player%} is not set:
+			send "{@error} Vous n'êtes dans aucune partie"
+		else if {host::%{host-player::%player%}%::host} is not player:
+			send "{@error} Vous n'êtes pas créateur de la partie !"
+		else:
+			set {_game} to {host-player::%player%}
+			if arg 1 is "setup":
+				if {host::%{_game}%::state} is not "waiting" or "starting":
+					send "{@error} Vous ne pouvez pas éditer la partie maintenant"
+				else if arg 2 is set:
+					send "{@error} Syntaxe: /host <setup>"
+				else:
+					uhcHostOpen(player)
+			else if arg 1 is "delete" or "del":
+				if {host::%{_game}%::state} is not "waiting":
+					send "{@error} Vous ne pouvez pas supprimer la partie maintenant"
+				else if arg 2 is set:
+					send "{@error} Syntaxe: /host <delete/del>"
+				else:
+					uhcDelete({_game})
+			else if arg 1 is "whitelist" or "wl":
+				if {host::%{_game}%::state} is not "waiting" or "starting":
+					send "{@error} Vous ne pouvez pas gérer la liste blanche acctuellement"
+				else if arg 2 is "add" or "+":
+					if arg 3 is not set:
+						send "{@error} Syntaxe: /host <whitelist/wl> <add/+> JOUEUR"
+					else if "%arg 3 parsed as offlineplayer%" is not arg 3:
+						send "{@error} Ce joueur n'existe pas !"
+					else if {host::%{_game}%::wl::*} contain arg 3 parsed as offlineplayer:
+						send "{@error} Ce joueur est déjà dans la liste-blanche"
+					else:
+						add arg 3 parsed as offlineplayer to {host::%{_game}%::wl::*}
+						send "&fVous avez &aajouté &fle joueur &e%arg 3 parsed as offlineplayer%&f à la liste-blanche"
+				else if arg 2 is "remove" or "-":
+					if arg 3 is not set:
+						send "{@error} Syntaxe: /host <whitelist/wl> <remove/-> JOUEUR"
+					else if "%arg 3 parsed as offlineplayer%" is not arg 3:
+						send "{@error} Ce joueur n'existe pas !"
+					else if {host::%{_game}%::wl::*} doesn't contain arg 3 parsed as offlineplayer:
+						send "{@error} Ce joueur n'est pas dans la liste-blanche"
+					else if arg 3 parsed as offlineplayer is {host::%{_game}%::host}:
+						send "{@error} &c✘ &eCe joueur ne peut pas être retiré de la liste-blanche"
+					else:
+						remove arg 3 parsed as offlineplayer from {host::%{_game}%::wl::*}
+						send "&fVous avez &cretiré &fle joueur &e%arg 3 parsed as offlineplayer%&f de la liste-blanche"
+				else if arg 2 is "list" or "l":
+					if arg 3 is set:
+						send "{@error} Syntaxe: /host <whitelist/wl> <list/l>"
+					else:
+						send ""
+					send "          &fGérer la &lListe-Blanche"
+					send ""
+					loop {host::%{_game}%::wl::*}:
+						if loop-value is {host::%{_game}%::host}:
+							send "&f- <tooltip:&cCe joueur ne peut pas être retiré de la liste-blanche>&c✘&r &f%loop-value%"
+						else:
+							send formatted "&f- %loop-value% &8- <tooltip:&7Cliquer!><suggest command:/host wl remove %loop-value%> &c➲ Retirer &7(Clic Gauche)"
+				else:
+					send ""
+					send "          &fGérer la &lListe-Blanche"
+					send ""
+					send "&aAjouter &fun joueur sur la liste &8- <suggest command:/host wl add JOUEUR><tooltip:&7Cliquer!>&a➲ Utiliser &7(Clic Gauche)"
+					send "&cRetirer &fun joueur de la liste &8- <suggest command:/host wl remove JOUEUR><tooltip:&7Cliquer!>&a➲ Utiliser &7(Clic Gauche)"
+					send "&eVoir &fla liste &8- <suggest command:/host wl list><tooltip:&7Cliquer!>&a➲ Utiliser &7(Clic Gauche)"
+
+
+Command /play [<text>]:
+	aliases: uhc
+	trigger:
+		if {perm::*} doesn't contain player:
+			send "{@error} T'as pas la perm"
+		else if size of {host-player::%player%::game::*} >= 5:
+			send "{@error} Ca fait beaucoup la quand même. 5 parties c'est déjà bien nan ?"
+		else if arg 1 is not "uhc":
+			send "{@error} Syntaxe: /play <game>"
+			send "{@error} Jeux disponibles: UHC"
+		else if {host-player::%player%::create} is true:
+			send string("uhc.error.already_creating", player) to player
+		else if {host-player::%player%} is set:
+			send string("uhc.error.already_playing", player) to player
+		else:
+			set {host-player::%player%::create} to true
+			uhcCreate(player)
+			add "▂▂▂▂▂▂▂▂▂▂" to {_animation::*}
+			add "▂▂▂▂▂▂▂▂▂▂" to {_animation::*}
+			add "▂▂▂▂▂▂▂▂▂▂" to {_animation::*}
+			add "▃▂▂▂▂▂▂▂▂▂" to {_animation::*}
+			add "▅▃▂▂▂▂▂▂▂▂" to {_animation::*}
+			add "▆▅▃▂▂▂▂▂▂▂" to {_animation::*}
+			add "▇▆▅▃▂▂▂▂▂▂" to {_animation::*}
+			add "▇▇▆▅▃▂▂▂▂▂" to {_animation::*}
+			add "▆▇▇▆▅▃▂▂▂▂" to {_animation::*}
+			add "▅▆▇▇▆▅▃▂▂▂" to {_animation::*}
+			add "▃▅▆▇▇▆▅▃▂▂" to {_animation::*}
+			add "▂▃▅▆▇▇▆▅▃▂" to {_animation::*}
+			add "▂▂▃▅▆▇▇▆▅▃" to {_animation::*}
+			add "▂▂▂▃▅▆▇▇▆▅" to {_animation::*}
+			add "▂▂▂▂▃▅▆▇▇▆" to {_animation::*}
+			add "▂▂▂▂▂▃▅▆▇▇" to {_animation::*}
+			add "▂▂▂▂▂▂▃▅▆▇" to {_animation::*}
+			add "▂▂▂▂▂▂▂▃▅▆" to {_animation::*}
+			add "▂▂▂▂▂▂▂▂▃▅" to {_animation::*}
+			add "▂▂▂▂▂▂▂▂▂▃" to {_animation::*}
+			add "▂▂▂▂▂▂▂▂▂▂" to {_animation::*}
+			add "▂▂▂▂▂▂▂▂▂▂" to {_animation::*}
+			add "▂▂▂▂▂▂▂▂▂▂" to {_animation::*}
+			set {_phase} to 1
+			while {host-player::%player%::create} is set:
+				if {_phase} is 1:
+					set {_phase::*} to {_animation::*}
+				else if {_phase} is 2:
+					set {_phase::*} to reversed {_animation::*}
+				loop {_phase::*}:
+					stop loop if ({host-player::%player%::create} is not set)
+					send title loop-value with subtitle "Chargement du serveur..." to player for 0.5 second with fadein 0 second and fadeout 1 tick
+					wait a tick
+				set {_phase} to 1 if ({_phase} is 2) else (2)
+			send title "" with subtitle "" to player for 1 tick with fadein 0 second and fadeout 0 second
+
+Command /join [<text>]:
+	trigger:
+		if arg 1 is set:
+			uhcJoin(player, arg 1)
+		else:
+			send "{@error} Syntaxe: /join <game>"
+
+Command /hoststate [<offlineplayer>]:
+	trigger:
+		if player is not op:
+			send "{@error} T'es pas op"
+		else if arg 1 is not set:
+			send "{@error} Syntaxe: /hoststate <joueur>"
+		else if {perm::*} contain arg 1:
+			remove arg 1 from {perm::*}
+			send "&fCe joueur ne peut plus créer des hosts"
+		else:
+			add arg 1 to {perm::*}
+			send "&fCe joueur peut créer des hosts"
+
+Command /stop:
+	trigger:
+		if sender is not op or console:
+			send "{@error} T'es pas op (tu peux aussi faire ""/minecraft:stop"")"
+		else:
+			send "" to console
+			send "&eArrêt du serveur dans 15 secondes!" to console
+			send "" to console
+			kick all players due to "&cArrêt du serveur en cours..."
+			wait 5 seconds
+			send "" to console
+			send "&eArrêt du serveur dans 10 secondes!" to console
+			send "" to console
+			make console execute command "/admin"
+			wait 5 seconds
+			send "" to console
+			send "&eArrêt du serveur dans 5 secondes!" to console
+			send "" to console
+			wait 5 seconds
+			send "" to console
+			send "&eArrêt du serveur!" to console
+			send "" to console
+			stop the server
+
+On right-click:
+	event-entity is a villager
+	cancel event
+	openUhcList(player)

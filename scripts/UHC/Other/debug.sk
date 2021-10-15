@@ -1,0 +1,53 @@
+Options:
+	error: &c
+	success: &a
+	info: &e
+
+Command /admin:
+	trigger:
+		send "{@info} Suppression des hosts..."
+		set {_} to now
+		clear {host::*}
+		clear {host-list::*}
+		clear {host-player::*}
+		clear {host-task::*}
+		clear {structures::*}
+		clear {chunk::*}
+		loop all worlds:
+			"%loop-world%" contain "UHCHOST-"
+			uhcDelete("%loop-world%")
+		send "{@success} Terminé ! (Took %difference between now and {_}%&a)"
+
+On skript unload:
+	clear {host::*}
+	clear {host-list::*}
+	clear {host-player::*}
+	clear {host-task::*}
+	clear {structures::*}
+	clear {chunk::*}
+
+On chunk unload:
+	loop {host-list::*}:
+		{chunk::%loop-value%::*} contain event-chunk
+		{host::%{_w}%::state} is "loading" or "waiting"
+		cancel event
+
+Command /fakeplayer [<string>] [<integer>]:
+	aliases: fp
+	permission: admin
+	trigger:
+		set {_game} to {host-player::%player%}
+		set {_p} to (arg 1) if (arg 1 is set) else ("Notch")
+		set {_size} to (arg 2) if (arg 2 is set) else (1)
+		loop {_size} times:
+			add {_p} to {host::%{_game}%::p::*}
+		send "&a+ &f%{_size}% faux joueur(s) nommé(s) &a%{_p}% &fa/ont &arejoint &fla partie. (&a%size of {host::%{_game}%::p::*}%&f/&a%{host::%{_game}%::slots}%&f)" to {host::%{_game}%::p::*}
+
+Command /fakeleave [<string>]:
+	aliases: fl
+	permission: admin
+	trigger:
+		set {_game} to {host-player::%player%}
+		set {_p} to (arg 1) if (arg 1 is set) else ("Notch")
+		remove all {_p} from {host::%{_game}%::p::*}
+		send "&c- &fDes faux joueurs ont été retirés de la partie!" to {host::%{_game}%::p::*}

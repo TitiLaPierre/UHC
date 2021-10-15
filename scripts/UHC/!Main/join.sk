@@ -1,0 +1,82 @@
+Function uhcJoin(p: player, game: text):
+	set {_error} to uhcIsJoinableAsPlayer({_p}, {_game})
+	if {_error} is set:
+		send string("uhc.error.%{_error}%", {_p}) to {_p}
+	else:
+		add {_p} to {host::%{_game}%::p::*}
+		send string("uhc.game_management.join_game", {_p}, ("player;%{_p}%", "players;%size of {host::%{_game}%::p::*}%", "slots;%{host::%{_game}%::slots}%")) to {host::%{_game}%::p::*}
+		set {host-player::%{_p}%} to {_game}
+		uhcWaitingInventory({_p})
+		teleport {_p} to location(0, 200, 0, {host::%{_game}%::world})
+		uhcTab()
+
+Function uhcJoinAsSpec(p: player, game: string):
+	set {_error} to uhcIsJoinableAsSpec({_p}, {_game})
+	if {_error} is set:
+		send string("uhc.error.%{_error}%", {_p}) to {_p}
+	else:
+		set {host-player::%{_p}%} to {_game}
+		send string("uhc.game_management.join_game_as_spec", {_p}) to {_p}
+		add {_p} to {host::%{_game}%::spec::*}
+		set {_p}'s gamemode to spectator
+		teleport {_p} to location(0, 200, 0, {host::%{_game}%::world})
+		uhcTab()
+		uhcScoreGameOpen({_p})
+
+Function uhcIsJoinableAsPlayer(p: player, game: string) :: string:
+	if {host::%{_game}%::whitelist} is "open":
+		set {_check} to true
+	if {host::%{_game}%::wl::*} contain {_p}:
+		set {_check} to true
+	if {host::%{_game}%::host} is {_p}:
+		set {_check} to true
+	if {host-player::%{_p}%} is set:
+		return "already_playing"
+	else if {host-list::*} doesn't contain {_game}:
+		return "game_does_not_exist"
+	else if {host::%{_game}%::state} is not "waiting" or "starting":
+		return "already_started"
+	else if size of {host::%{_game}%::p::*} >= {host::%{_game}%::slots}:
+		return "game_full"
+	else if {_check} is not true:
+		return "game_private"
+
+Function uhcIsJoinableAsSpec(p: player, game: string) :: string:
+	if {host-player::%{_p}%} is set:
+		return "already_playing"
+	else if {host-list::*} doesn't contain {_game}:
+		return "game_does_not_exist"
+	else if {host::%{_game}%::game::spec} is "none" or "players":
+		return "game_unaccessible_as_spec"
+	else if {host::%{_game}%::state} is "end":
+		return "game_ended"
+	else if {host::%{_game}%::state} is "waiting" or "starting":
+		return "game_not_started"
+
+Function uhcWaitingInventory(p: player):
+	set {_game} to {host-player::%{_p}%}
+	set {_team} to {host-player::%{_p}%::team}
+	clear {_p}'s inventory
+	heal {_p}
+	feed {_p}
+	clear level of {_p}
+	set {_p}'s gamemode to adventure
+	if {_p} is {host::%{_game}%::host}:
+		set slot 0 of {_p} to command block named string("uhc.lobby.items.edit_game", {_p})
+	if {_team} is not set:
+		set {_teamChoice} to white banner item
+	else:
+		set {_teamChoice} to {teams::t::%{_team}%::item}
+	set name of {_teamChoice} to string("uhc.lobby.items.change_team", {_p})
+	set slot 1 of {_p} to {_teamChoice}
+	set slot 8 of {_p} to red dye named string("uhc.lobby.items.leave_game", {_p})
+	uhcScoreWaitingOpen({_p})
+	loop {host::%{_game}%::p::*}:
+		uhcScoreWaitingUpdate(loop-value)
+	uhcTab()
+
+On uhc lang change:
+	set {_game} to {host-player::%player%}
+	{_game} is set
+	{host::%{_game}%::state} is "waiting" or "starting"
+	uhcWaitingInventory(player)

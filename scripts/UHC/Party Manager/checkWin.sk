@@ -1,0 +1,31 @@
+Function uhcCheckWin(game: string):
+	{host::%{_game}%::state} is not "end"
+	if size of {host::%{_game}%::teams::*} is 1:
+		uhcWin({_game}, 1)
+	else if size of {host::%{_game}%::teams::*} is 0:
+		uhcWin({_game}, 2)
+
+Function uhcWin(game: string, method: integer):
+	if {_method} is 1:
+		set {_team} to first element of {host::%{_game}%::teams::*}
+		loop {host::%{_game}%::p::*} and {host::%{_game}%::spec::*}:
+			set {_teamName} to string("uhc.teams.%{_team}%", loop-value)
+			send colored strings("uhc.game_management.victory", loop-value, "team;%{_teamName}%") to loop-value
+	else if {_method} is 2:
+		loop {host::%{_game}%::p::*} and {host::%{_game}%::spec::*}:
+			send colored strings("uhc.game_management.none", loop-value) to loop-value
+	else:
+		uhcError("Unknown method", "The method following is not recognized.", "checkWin.sk", "uhcWin()", "Method: %{_method}%")
+		stop
+	set {host::%{_game}%::state} to "end"
+	set {host::%{_game}%::nodamage} to true
+	add {host::%{_game}%::p::*} to {host::%{_game}%::spec::*}
+	clear {host::%{_game}%::p::*}
+	set {host::%{_game}%::spec::*}'s gamemode to spectator
+	uhcTab()
+	loop {host::%{_game}%::spec::*}:
+		loop-value is online
+		delete loop-value's sidebar
+		uhcPartyToLobby(loop-value)
+	wait 30 seconds
+	uhcDelete({_game}, true)
